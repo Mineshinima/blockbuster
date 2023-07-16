@@ -61,7 +61,8 @@ repositories {
     }
 }
 
-loom {
+// For some reason atm this causes major issues for referencing MC classes
+/*loom {
     splitEnvironmentSourceSets()
 
     mods {
@@ -71,7 +72,7 @@ loom {
         }
     }
 
-}
+}*/
 
 dependencies {
     // To change the versions see the gradle.properties file
