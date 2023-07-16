@@ -1,0 +1,26 @@
+modLoader="javafml"
+loaderVersion="[41,)"
+issueTrackerURL="https://github.com/Mineshinima/blockbuster/issues"
+license="GPL-3.0"
+[[mods]]
+    modId="blockbuster"
+    version="${file.jarVersion}"
+    displayName="Blockbuster"
+    displayURL="https://modrinth.com/mod/blockbuster"
+    authors="Chryfi, Flashi and Sekwah"
+    description='''Tinky Winky wants his muffins back'''
+
+[[dependencies.blockbuster]]
+    modId="forge"
+    mandatory=true
+    versionRange="[46.0.1,)"
+    ordering="NONE"
+    side="BOTH"
+
+# https://maven.apache.org/enforcer/enforcer-rules/versionRanges.html
+[[dependencies.blockbuster]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.20,1.21)"
+    ordering="NONE"
+    side="BOTH"

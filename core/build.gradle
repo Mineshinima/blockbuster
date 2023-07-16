@@ -1,0 +1,59 @@
+buildscript {
+    repositories {
+        maven { url = 'https://files.minecraftforge.net/maven' }
+        maven { url = "https://repo.spongepowered.org/maven" }
+        maven {url "https://plugins.gradle.org/m2/"}
+        mavenCentral()
+    }
+    dependencies {
+        classpath(group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '6.0.+', changing: true)
+        classpath "org.spongepowered:mixingradle:0.7-SNAPSHOT"
+    }
+}
+
+apply plugin: 'net.minecraftforge.gradle'
+apply plugin: "java"
+apply plugin: 'eclipse'
+//apply plugin: 'maven-publish'
+
+// May be able to remove it
+apply plugin: "org.spongepowered.mixin"
+
+group = project.package // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
+
+println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
+minecraft {
+    // The mappings can be changed at any time, and must be in the following format.
+    // snapshot_YYYYMMDD   Snapshot are built nightly.
+    // stable_#            Stables are built at the discretion of the MCP team.
+    // Use non-default mappings at your own risk. they may not always work.
+    // Simply re-run your setup task after changing the mappings to update your workspace.
+    mappings channel: 'official', version: project.minecraft_version
+
+    // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
+
+    // Default run configurations.
+    // These can be tweaked, removed, or duplicated as needed.
+    runs {
+        // Copy from other projects if needed
+    }
+}
+
+
+dependencies {
+
+    // Specify the version of Minecraft to use, If this is any group other then 'net.minecraft' it is assumed
+    // that the dep is a ForgeGradle 'patcher' dependency. And it's patches will be applied.
+    // The userdev artifact is a special name and will get all sorts of transformations applied to it.
+    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+
+
+}
+
+// these currently don't work. Re-enable them when forge is shipping with them again.
+/*mixin {
+    add sourceSets.main, "mixins.${project.modid}.refmap.json"
+}*/

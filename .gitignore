@@ -1,0 +1,12 @@
+\.gradle/
+eclipse/
+out/
+*.iml
+*.ipr
+*.iws
+
+
+\.idea/
+\classes/
+run/
+build/

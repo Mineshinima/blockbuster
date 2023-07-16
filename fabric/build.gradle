@@ -1,0 +1,169 @@
+import org.apache.http.HttpEntity
+import org.apache.http.client.methods.CloseableHttpResponse
+import org.apache.http.client.methods.HttpPost
+import org.apache.http.entity.ContentType
+import org.apache.http.entity.mime.MultipartEntityBuilder
+import org.apache.http.impl.client.CloseableHttpClient
+import org.apache.http.impl.client.HttpClients
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.apache.httpcomponents:httpmime:4.5.14"
+    }
+}
+
+plugins {
+    id 'fabric-loom' version '1.2-SNAPSHOT'
+    id 'maven-publish'
+    id "com.modrinth.minotaur" version "2.+"
+    id "com.matthewprenger.cursegradle" version "1.4.0"
+}
+
+def branch = System.getenv("GITHUB_REF")
+def snapshotName = null;
+if(branch != null) {
+    branch = branch.replace('refs/heads/', '')
+}
+def isRelease = System.getenv("IS_RELEASE") == "true"
+
+snapshotName = ((branch == null || branch.startsWith("release-please")) ? "SNAPSHOT" : branch)
+def githubSha = System.getenv("GITHUB_SHA")
+def shaRef = githubSha != null ? "-${githubSha.substring(0, 8)}" : ""
+
+println "Branch ${branch}${shaRef} isRelease: '${isRelease}'"
+
+// Get version from file managed by please-release
+def versionString = (file('../version.txt').text + (isRelease ? "" : "-${snapshotName}${shaRef}")).replaceAll('\n', '')
+setVersion(versionString)
+println "Version: ${getVersion()}"
+
+group = project.package // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+
+base {
+    archivesName = project.archive
+}
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
+
+repositories {
+    // Add repositories to retrieve artifacts from in here.
+    // You should only use this when depending on other mods because
+    // Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
+    // See https://docs.gradle.org/current/userguide/declaring_repositories.html
+    // for more information about repositories.
+    maven {
+        name = "Terrafromer MC"
+        url = "https://maven.terraformersmc.com/releases"
+    }
+}
+
+loom {
+    splitEnvironmentSourceSets()
+
+    mods {
+        "${project.modid}" {
+            sourceSet sourceSets.main
+            sourceSet sourceSets.client
+        }
+    }
+
+}
+
+dependencies {
+    // To change the versions see the gradle.properties file
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    modImplementation "net.fabricmc:fabric-loader:${project.fabric_loader_version}"
+    mappings loom.officialMojangMappings()
+
+    // Fabric API. This is technically optional, but you probably want it anyway.
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+
+
+    modImplementation "com.terraformersmc:modmenu:7.1.0"
+
+    // Uncomment the following line to enable the deprecated Fabric API modules.
+    // These are included in the Fabric API production distribution and allow you to update your mod to the latest modules at a later more convenient time.
+
+    // modImplementation "net.fabricmc.fabric-api:fabric-api-deprecated:${project.fabric_version}"
+}
+
+processResources {
+    from project(":core").sourceSets.main.resources
+    inputs.property "version", getVersion()
+
+    filesMatching("fabric.mod.json") {
+        expand "version": getVersion()
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    it.options.release = 17
+}
+
+java {
+    // Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
+    // if it is present.
+    // If you remove this line, sources will not be generated.
+    withSourcesJar()
+
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+jar {
+    archiveClassifier = 'universal'
+    archiveBaseName = "${archivesBaseName}${project.mc_label}-fabric"
+    from("LICENSE") {
+        rename { "${it}_${project.archivesBaseName}"}
+    }
+}
+
+
+
+def getReleaseChangelog() {
+    def changelogFile = file('../CHANGELOG.md')
+    def changelog = "## [${changelogFile.text.split('\n## \\[')[1]}\n\n"// ${project.github}/blob/${branch}/CHANGELOG.md
+    return changelog;
+}
+
+task discordupload {
+    dependsOn(jar)
+    doLast {
+        String discordWebhook = System.getenv("DISCORD_WEBHOOK")
+
+        if(discordWebhook != null) {
+
+            CloseableHttpClient httpClient = HttpClients.createDefault()
+            HttpPost uploadFile = new HttpPost(discordWebhook)
+
+            MultipartEntityBuilder builder = MultipartEntityBuilder.create()
+            if(!isRelease) {
+                builder.addTextBody("content", "New snapshot or testing build")
+            } else {
+                builder.addTextBody("content", "New release build\n" +
+                        "${getReleaseChangelog()}")
+            }
+
+            var name = jar.archiveBaseName.get() + "-" + jar.archiveVersion.get() + ".jar"
+
+            builder.addBinaryBody("file", file(jar.archiveFile).newInputStream(), ContentType.APPLICATION_OCTET_STREAM, name)
+
+            HttpEntity multipart = builder.build()
+
+            uploadFile.setEntity(multipart)
+            CloseableHttpResponse response = httpClient.execute(uploadFile)
+            response.getEntity()
+
+            println("Posted build")
+
+        } else {
+            println("Discord webhook unspecified")
+        }
+    }
+}
+
+

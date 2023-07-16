@@ -1,0 +1,35 @@
+// In the old version for auto you couldnt have separate later stages easily
+// Thanks to release-please we can leave this mostly empty
+// Need to clean up the gradle files as I know however the focus is on it working vs being best practices.
+// If you have suggestions on how to improve these feel free to make th em :)
+
+plugins {
+    id "com.modrinth.minotaur" version "2.+"
+}
+
+def branch = System.getenv("GITHUB_REF")
+def snapshotName = null;
+if(branch != null) {
+    branch = branch.replace('refs/heads/', '')
+}
+def isRelease = System.getenv("IS_RELEASE") == "true"
+
+snapshotName = ((branch == null || branch.startsWith("release-please")) ? "SNAPSHOT" : branch)
+def githubSha = System.getenv("GITHUB_SHA")
+def shaRef = githubSha != null ? "-${githubSha.substring(0, 8)}" : ""
+
+println "Branch ${branch}${shaRef} isRelease: '${isRelease}'"
+
+// Please only run this with modrinthSyncBody
+modrinth {
+    token = System.getenv("MODRINTH_TOKEN")
+    projectId = project.modrinth_slug
+    syncBodyFrom = rootProject.file("README.md").text
+}
+
+
+task curseforge {
+    doLast {
+        println "This is a dummy task to run the underlying projects"
+    }
+}

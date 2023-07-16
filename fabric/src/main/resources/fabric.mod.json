@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "blockbuster",
+  "version": "${version}",
+  "name": "Blockbuster",
+  "description": "Tinky Winky stole my muffins.",
+  "authors": ["Chryfi", "Flashi", "Sekwah"],
+  "contact": {
+    "sources": "https://github.com/Mineshinima/blockbuster/"
+  },
+  "license": "GPL-3.0",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.mineshinima.blockbuster.BlockbusterFabric"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.14.21",
+    "minecraft": ">=1.20",
+    "java": ">=17",
+    "fabric-api": "*"
+  },
+  "suggests": {
+  }
+}
