@@ -1,7 +1,7 @@
 on:
   push:
     branches-ignore:
-      - master
+      - main
       - "renovate/*"
       - "dependabot/*"
   workflow_dispatch:
@@ -11,7 +11,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        loader: [ forge, fabric ]
+        loader:
+          - forge
+#         - fabric
         release-task: [ discordupload ]
     #if: ${{!startsWith(github.ref.split(’/’)[2], 'release-please')}}
     runs-on: ubuntu-latest
