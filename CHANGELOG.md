@@ -1,6 +1,6 @@
 # Changelog
 
-### 2.6.1 (2023-05-08)
+## [2.6.1](https://www.curseforge.com/minecraft/mc-mods/blockbuster/files/4528660) (2023-05-08)
 This update was made by Chryfi, exceptions are mentioned at the respective items
 
 Compatible with McLib `2.4.2`, Metamorph `1.3.1` and Aperture `1.8.1`. It doesn't mean that future versions of Metamorph and Aperture would be incompatible, but older versions are most likely incompatible.
