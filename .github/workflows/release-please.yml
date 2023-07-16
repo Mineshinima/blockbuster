@@ -25,7 +25,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        loader: [forge, fabric]
+        loader:
+         - forge
+#         - fabric
         release-task: [curseforge, discordupload, modrinth, publish]
     needs: release-please
     runs-on: ubuntu-latest
