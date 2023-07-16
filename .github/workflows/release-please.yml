@@ -16,7 +16,7 @@ jobs:
         id: release
         with:
           command: manifest
-          token: ${{ secrets.PAT }}
+          # token: ${{ secrets.PAT }}
           # See how to configure file https://github.com/googleapis/release-please/blob/main/docs/manifest-releaser.md
       # See output info at https://github.com/google-github-actions/release-please-action#configuration for variables
 
