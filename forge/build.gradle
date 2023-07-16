@@ -63,6 +63,7 @@ repositories {
             includeGroup "curse.maven"
         }
     }
+    maven { url = "https://maven.sekwah.com" }
 }
 
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
@@ -157,6 +158,8 @@ minecraft {
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
+jarJar.enable()
+
 dependencies {
 
     // Specify the version of Minecraft to use, If this is any group other then 'net.minecraft' it is assumed
@@ -168,6 +171,8 @@ dependencies {
 
     implementation 'org.spongepowered:mixin:0.8.5'
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+
+    implementation jarJar(fg.deobf("com.sekwah:SekCLib:[1.0.0,2.0.0)"))
 
     //compile "com.sekwah:SekCLib:${sekclib_version}:deobf"
     // Trick intellij to allow for better editing in here for the discord task
