@@ -27,6 +27,10 @@ modrinth {
     syncBodyFrom = rootProject.file("README.md").text
 }
 
+repositories {
+    mavenCentral()
+}
+
 
 task curseforge {
     doLast {
