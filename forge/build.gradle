@@ -338,7 +338,7 @@ modrinth {
     gameVersions = project.game_versions.tokenize(",")
     changelog = getReleaseChangelog()
 
-    syncBodyFrom = rootProject.file("README.md").text
+    syncBodyFrom = rootProject.file("docs/README.md").text
 }
 
 tasks.withType(JavaCompile) {

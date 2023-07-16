@@ -24,7 +24,7 @@ println "Branch ${branch}${shaRef} isRelease: '${isRelease}'"
 modrinth {
     token = System.getenv("MODRINTH_TOKEN")
     projectId = project.modrinth_slug
-    syncBodyFrom = rootProject.file("README.md").text
+    syncBodyFrom = rootProject.file("docs/README.md").text
 }
 
 repositories {
