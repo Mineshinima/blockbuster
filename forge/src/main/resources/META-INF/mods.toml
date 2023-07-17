@@ -8,6 +8,7 @@ license="GPL-3.0"
     displayName="Blockbuster"
     displayURL="https://modrinth.com/mod/blockbuster"
     authors="Chryfi, Flashi and Sekwah"
+    logoFile="blockbuster.png"
     description='''Tinky Winky wants his muffins back'''
 
 [[dependencies.blockbuster]]

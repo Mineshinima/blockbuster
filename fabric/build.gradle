@@ -62,17 +62,26 @@ repositories {
 }
 
 // For some reason atm this causes major issues for referencing MC classes
-/*loom {
-    splitEnvironmentSourceSets()
+loom {
 
     mods {
         "${project.modid}" {
             sourceSet sourceSets.main
-            sourceSet sourceSets.client
         }
     }
 
-}*/
+    runs {
+        client {
+            environment = "client"
+            configName = "Fabric Client"
+            runDir = "run"
+            source = sourceSets.main
+            ideConfigGenerated = true
+            client()
+        }
+    }
+
+}
 
 dependencies {
     // To change the versions see the gradle.properties file
