@@ -2,11 +2,13 @@
   "required": true,
   "minVersion": "0.8",
   "compatibilityLevel": "JAVA_17",
-  "package": "com.mineshinima.blockbuster.mixin",
-  "refmap": "mixins.narutomod.refmap.json",
+  "package": "com.mineshinima.mclib.mixins",
+  "refmap": "mixins.blockbuster.refmap.json",
   "mixins": [
   ],
   "client": [
+    "MixinWindow",
+    "MixinMinecraft"
   ],
   "injectors": {
     "defaultRequire": 1
