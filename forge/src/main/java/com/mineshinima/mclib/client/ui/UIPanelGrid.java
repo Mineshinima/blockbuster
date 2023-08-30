@@ -275,6 +275,10 @@ public class UIPanelGrid extends UIElement {
         return intersectionLine.isInside(x, y);
     }
 
+    /**
+     * Reset the grids to what they were before dragging
+     * @param context
+     */
     protected void resetDragging(UIContext context) {
         this.getPanelGridRoot().convertToPixels();
         this.resetGrids();
@@ -297,11 +301,17 @@ public class UIPanelGrid extends UIElement {
 
     @Override
     public boolean postRenderedMouseClick(UIContext context) {
-        if (context.getMouseKey() == GLFW_MOUSE_BUTTON_LEFT
+        if (context.isLeftMouseButton()
                 && this.panel == null && this.isOnEdge(context.getMouseX(), context.getMouseY())) {
             this.clickGrids(context);
 
-            context.registerClick(GLFW_MOUSE_BUTTON_RIGHT, this::resetDragging);
+            context.registerClick(GLFW_MOUSE_BUTTON_RIGHT, this);
+
+            return true;
+        }
+
+        if (context.isRightMouseButton() && this.dragging) {
+            this.resetDragging(context);
 
             return true;
         }
@@ -330,6 +340,8 @@ public class UIPanelGrid extends UIElement {
     public boolean postRenderedMouseRelease(UIContext context) {
         if (this.dragging) {
             this.releaseMouse(context);
+
+            context.removeRegisteredClick(GLFW_MOUSE_BUTTON_RIGHT, this);
 
             return true;
         }

@@ -6,7 +6,6 @@ import net.minecraft.client.Minecraft;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Consumer;
 
 import static org.lwjgl.glfw.GLFW.*;
 
@@ -14,7 +13,7 @@ public class UIContext {
     private boolean debug;
     private final Window window;
     private final UIScreen screen;
-    private final Map<Integer, Consumer<UIContext>> clickEvents = new HashMap<>();
+    private final Map<Integer, UIElement> clickEvents = new HashMap<>();
     //TODO mouse as int? GLFW returns double, and Minecraft returns double because it converts it to GUI space... but we use global
     private UIGraphics graphics;
     private double mouseX;
@@ -47,20 +46,35 @@ public class UIContext {
         return this.graphics;
     }
 
-    public void registerClick(int mouseKey, Consumer<UIContext> callback) {
-        this.clickEvents.put(mouseKey, callback);
+    /**
+     * Register a prioritized click event for the given mouseKey.
+     * <br><br>
+     * Clicking will happen via the {@link UIElement#postRenderedMouseClick(UIContext)} method.
+     * @param mouseKey
+     * @param element
+     */
+    public void registerClick(int mouseKey, UIElement element) {
+        this.clickEvents.put(mouseKey, element);
     }
 
-    public boolean hasClickEvent() {
-        return this.clickEvents.containsKey(this.mouseKey);
+    public void removeRegisteredClick(int mouseKey, UIElement element) {
+        this.clickEvents.remove(mouseKey, element);
     }
 
     /**
-     * @throws NullPointerException when there is no click event for the current mouse key.
-     *                              You should have used {@link #hasClickEvent()} first.
+     * Execute a registered prioritized click event, if present.
+     * <br><br>
+     * This calls the {@link UIElement#postRenderedMouseClick(UIContext)} method.
+     * <br>
+     * @return true if there was a registered click event for the current mouseKey
+     *         and when its mouseEvent method returned true.
      */
-    public void executeClickEvent() {
-        this.clickEvents.get(this.mouseKey).accept(this);
+    public boolean mouseClick() {
+        if (this.clickEvents.containsKey(this.mouseKey)) {
+            return this.clickEvents.get(this.mouseKey).postRenderedMouseClick(this);
+        }
+
+        return false;
     }
 
     public void setMouse(double mouseX, double mouseY) {
@@ -106,6 +120,30 @@ public class UIContext {
 
     public int getMouseKey() {
         return this.mouseKey;
+    }
+
+    /**
+     * A convenience method to avoid a lot of repeating code and better readability.
+     * @return true when the mouse key is the left mouse button.
+     */
+    public boolean isLeftMouseButton() {
+        return this.mouseKey == GLFW_MOUSE_BUTTON_LEFT;
+    }
+
+    /**
+     * A convenience method to avoid a lot of repeating code and better readability.
+     * @return true when the mouse key is the right mouse button.
+     */
+    public boolean isRightMouseButton() {
+        return this.mouseKey == GLFW_MOUSE_BUTTON_RIGHT;
+    }
+
+    /**
+     * A convenience method to avoid a lot of repeating code and better readability.
+     * @return true when the mouse key is the middle mouse button.
+     */
+    public boolean isMiddleMouseButton() {
+        return this.mouseKey == GLFW_MOUSE_BUTTON_MIDDLE;
     }
 
     public float getPartialTicks() {

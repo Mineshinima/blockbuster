@@ -695,6 +695,7 @@ public class UIElement {
     }
 
     /**
+     * TODO rename this bad boi? McHorse thinks the name is misleading and I don't like it either as it's very long
      * This is for handling clicks on stuff that is rendered in the method {@link #postRender(UIContext)}.
      * This will be called before the children will be traversed.
      * This method helps if there is something that needs to be clicked

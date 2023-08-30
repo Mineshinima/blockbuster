@@ -11,7 +11,6 @@ import net.minecraft.client.GameNarrator;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.joml.Matrix4f;
@@ -143,9 +142,7 @@ public class UIScreen extends Screen {
     public boolean mouseClicked(double mouseX, double mouseY, int mouseKey) {
         this.updateMouseContext(mouseKey);
 
-        if (this.context.hasClickEvent()) {
-            this.context.executeClickEvent();
-
+        if (this.context.mouseClick()) {
             return true;
         }
 

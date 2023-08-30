@@ -188,13 +188,13 @@ public class UIScrollElement extends UIElement {
     @Override
     public boolean postRenderedMouseClick(UIContext context) {
         if (this.scrollDirection == null && this.contentArea.isInside(context.getMouseX(), context.getMouseY())
-                && context.getMouseKey() == GLFW_MOUSE_BUTTON_MIDDLE) {
+                && context.isMiddleMouseButton()) {
             this.dragVertical = true;
             this.dragHorizontal = true;
             return true;
         }
 
-        if (!this.renderScrollbar || context.getMouseKey() != GLFW_MOUSE_BUTTON_LEFT) return false;
+        if (!this.renderScrollbar || !context.isLeftMouseButton()) return false;
 
         Area horizontalScrollbar = this.getHorizontalScrollbar();
         Area verticalScrollbar = this.getVerticalScrollbar();
