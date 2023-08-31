@@ -4,8 +4,7 @@ import com.mineshinima.mclib.client.ui.utils.UIGraphics;
 import com.mojang.blaze3d.platform.Window;
 import net.minecraft.client.Minecraft;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static org.lwjgl.glfw.GLFW.*;
 
@@ -19,7 +18,8 @@ public class UIContext {
     private double mouseX;
     private double mouseY;
     private double mouseScroll;
-    private int mouseKey;
+    private final Set<Integer> pressedMouseKeys = new HashSet<>();
+    private int currentMouseKey;
     private int keyboardKey;
     private float partialTicks;
     /**
@@ -70,8 +70,8 @@ public class UIContext {
      *         and when its mouseEvent method returned true.
      */
     public boolean mouseClick() {
-        if (this.clickEvents.containsKey(this.mouseKey)) {
-            return this.clickEvents.get(this.mouseKey).postRenderedMouseClick(this);
+        if (this.clickEvents.containsKey(this.currentMouseKey)) {
+            return this.clickEvents.get(this.currentMouseKey).postRenderedMouseClick(this);
         }
 
         return false;
@@ -119,7 +119,7 @@ public class UIContext {
     }
 
     public int getMouseKey() {
-        return this.mouseKey;
+        return this.currentMouseKey;
     }
 
     /**
@@ -127,7 +127,7 @@ public class UIContext {
      * @return true when the mouse key is the left mouse button.
      */
     public boolean isLeftMouseButton() {
-        return this.mouseKey == GLFW_MOUSE_BUTTON_LEFT;
+        return this.currentMouseKey == GLFW_MOUSE_BUTTON_LEFT;
     }
 
     /**
@@ -135,7 +135,7 @@ public class UIContext {
      * @return true when the mouse key is the right mouse button.
      */
     public boolean isRightMouseButton() {
-        return this.mouseKey == GLFW_MOUSE_BUTTON_RIGHT;
+        return this.currentMouseKey == GLFW_MOUSE_BUTTON_RIGHT;
     }
 
     /**
@@ -143,15 +143,38 @@ public class UIContext {
      * @return true when the mouse key is the middle mouse button.
      */
     public boolean isMiddleMouseButton() {
-        return this.mouseKey == GLFW_MOUSE_BUTTON_MIDDLE;
+        return this.currentMouseKey == GLFW_MOUSE_BUTTON_MIDDLE;
     }
 
     public float getPartialTicks() {
         return this.partialTicks;
     }
 
-    public void setMouseKey(int mouseKey) {
-        this.mouseKey = mouseKey;
+    /**
+     * This method sets the current mouseKey and adds it to the pressed mouseKeys.
+     * This method shall not be called when releasing a mouseKey.
+     * @param mouseKey
+     */
+    public void clickMouseKey(int mouseKey) {
+        this.currentMouseKey = mouseKey;
+        this.pressedMouseKeys.add(mouseKey);
+    }
+
+    /**
+     * This method sets the current mouseKey and removes it from the pressed mouseKeys.
+     * This method shall not be called when clicking a mouseKey.
+     * @param mouseKey
+     */
+    public void releaseMouseKey(int mouseKey) {
+        this.currentMouseKey = mouseKey;
+        this.pressedMouseKeys.remove(mouseKey);
+    }
+
+    /**
+     * @return the currently holding mouse keys.
+     */
+    public Set<Integer> getPressedMouseKeys() {
+        return new HashSet<>(this.pressedMouseKeys);
     }
 
     public void setPartialTicks(float partialTicks) {

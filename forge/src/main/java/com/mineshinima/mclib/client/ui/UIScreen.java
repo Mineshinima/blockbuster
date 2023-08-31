@@ -97,7 +97,7 @@ public class UIScreen extends Screen {
         RenderSystem.setProjectionMatrix(matrix4f, VertexSorting.ORTHOGRAPHIC_Z);
         RenderSystem.disableDepthTest();
 
-        this.updateMouseContext();
+        this.updateMousePosition();
         this.context.setPartialTicks(partialTicks);
         this.context.setUIGraphics(new UIGraphics(graphics));
 
@@ -128,19 +128,20 @@ public class UIScreen extends Screen {
 
     @Override
     public boolean isMouseOver(double mouseX, double mouseY) {
-        this.updateMouseContext();
+        this.updateMousePosition();
         return this.root.isMouseOver(this.context);
     }
 
     @Override
     public void mouseMoved(double mouseX, double mouseY) {
-        this.updateMouseContext();
+        this.updateMousePosition();
         this.root.mouseMoved(this.context);
     }
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int mouseKey) {
-        this.updateMouseContext(mouseKey);
+        this.context.clickMouseKey(mouseKey);
+        this.updateMousePosition();
 
         if (this.context.mouseClick()) {
             return true;
@@ -151,13 +152,17 @@ public class UIScreen extends Screen {
 
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int mouseKey) {
-        this.updateMouseContext(mouseKey);
+        this.context.releaseMouseKey(mouseKey);
+        this.updateMousePosition();
+
         return this.root.mouseReleased(this.context);
     }
 
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int mouseKey, double dragX, double dragY) {
-        this.updateMouseContext(mouseKey);
+        this.context.clickMouseKey(mouseKey);
+        this.updateMousePosition();
+
         dragX = dragX / (double) this.minecraft.getWindow().getGuiScaledWidth() * (double) this.minecraft.getWindow().getScreenWidth();
         dragY = dragY / (double) this.minecraft.getWindow().getGuiScaledHeight() * (double) this.minecraft.getWindow().getScreenHeight();
         return this.root.mouseDragged(this.context, dragX, dragY);
@@ -165,7 +170,7 @@ public class UIScreen extends Screen {
 
     @Override
     public boolean mouseScrolled(double x, double y, double scroll) {
-        this.updateMouseContext();
+        this.updateMousePosition();
         this.context.setMouseScroll(scroll);
         return this.root.mouseScrolled(this.context);
     }
@@ -181,12 +186,7 @@ public class UIScreen extends Screen {
         return this.root.keyPressed(this.context);
     }
 
-    private void updateMouseContext(int mouseKey) {
-        this.context.setMouseKey(mouseKey);
-        this.updateMouseContext();
-    }
-
-    private void updateMouseContext() {
+    private void updateMousePosition() {
         /* we cant use the position passed down by minecraft, because in render method it's cast to int already
         while everywhere else it's double. This causes inconsistencies. */
         double mouseX = GLUtils.getMousePosX(this.context.getWindow().getWindow());
