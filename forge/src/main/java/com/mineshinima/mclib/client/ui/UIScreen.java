@@ -69,7 +69,7 @@ public class UIScreen extends Screen {
         super.onClose();
 
         this.root.onClose();
-        this.context.applyDefaultCursor();
+        this.context.renderDefaultCursor();
         WindowHandler.resizeToWindowSize();
     }
 
@@ -111,10 +111,10 @@ public class UIScreen extends Screen {
         this.root.render(this.context);
 
         if (!this.context.cursorChanged()) {
-            this.context.applyDefaultCursor();
+            this.context.renderDefaultCursor();
         } else if (this.context.getPreparedCursor() != this.context.getRenderingCursor()) {
             /* to avoid applying a cursor everytime while might already be rendering */
-            this.context.applyPreparedCursor();
+            this.context.renderPreparedCursor();
         }
 
         if (WindowHandler.isOverwriting()) {

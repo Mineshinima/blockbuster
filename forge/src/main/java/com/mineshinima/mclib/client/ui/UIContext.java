@@ -35,7 +35,7 @@ public class UIContext {
     public UIContext(Window window, UIScreen screen) {
         this.window = window;
         this.screen = screen;
-        this.applyDefaultCursor();
+        this.renderDefaultCursor();
     }
 
     public void setUIGraphics(UIGraphics graphics) {
@@ -183,15 +183,15 @@ public class UIContext {
 
     /**
      * This does not change the appearance of the cursor rendered.
-     * After this method you need to still apply the cursor using {@link #applyPreparedCursor()}
+     * After this method you need to still apply the cursor using {@link #renderPreparedCursor()}
      */
     public void resetCursor() {
         this.glfwCursor = this.defaultGlfwCursor;
     }
 
-    public void applyDefaultCursor() {
+    public void renderDefaultCursor() {
         this.resetCursor();
-        this.applyPreparedCursor();
+        this.renderPreparedCursor();
     }
 
     /**
@@ -205,7 +205,7 @@ public class UIContext {
      * Applies the current cursor to GLFW using {@link org.lwjgl.glfw.GLFW#glfwSetCursor(long, long)}
      * This will change the appearance of the cursor on screen.
      */
-    public void applyPreparedCursor() {
+    public void renderPreparedCursor() {
         if (this.renderingCursor != this.glfwCursor) {
             glfwSetCursor(this.window.getWindow(), glfwCreateStandardCursor(this.glfwCursor));
             this.renderingCursor = this.glfwCursor;
