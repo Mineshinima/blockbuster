@@ -126,7 +126,7 @@ public class UIContext {
      * A convenience method to avoid a lot of repeating code and better readability.
      * @return true when the mouse key is the left mouse button.
      */
-    public boolean isLeftMouseButton() {
+    public boolean isLeftMouseKey() {
         return this.currentMouseKey == GLFW_MOUSE_BUTTON_LEFT;
     }
 
@@ -134,7 +134,7 @@ public class UIContext {
      * A convenience method to avoid a lot of repeating code and better readability.
      * @return true when the mouse key is the right mouse button.
      */
-    public boolean isRightMouseButton() {
+    public boolean isRightMouseKey() {
         return this.currentMouseKey == GLFW_MOUSE_BUTTON_RIGHT;
     }
 
@@ -142,7 +142,7 @@ public class UIContext {
      * A convenience method to avoid a lot of repeating code and better readability.
      * @return true when the mouse key is the middle mouse button.
      */
-    public boolean isMiddleMouseButton() {
+    public boolean isMiddleMouseKey() {
         return this.currentMouseKey == GLFW_MOUSE_BUTTON_MIDDLE;
     }
 

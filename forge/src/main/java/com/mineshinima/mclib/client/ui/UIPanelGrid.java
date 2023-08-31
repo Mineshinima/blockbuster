@@ -301,7 +301,7 @@ public class UIPanelGrid extends UIElement {
 
     @Override
     public boolean postRenderedMouseClick(UIContext context) {
-        if (context.isLeftMouseButton()
+        if (context.isLeftMouseKey()
                 && this.panel == null && this.isOnEdge(context.getMouseX(), context.getMouseY())) {
             this.clickGrids(context);
 
@@ -310,7 +310,7 @@ public class UIPanelGrid extends UIElement {
             return true;
         }
 
-        if (context.isRightMouseButton() && this.dragging) {
+        if (context.isRightMouseKey() && this.dragging) {
             this.resetDragging(context);
 
             return true;
