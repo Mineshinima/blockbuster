@@ -1,6 +1,7 @@
 package com.mineshinima.mclib.utils.rendering;
 
 import org.lwjgl.glfw.GLFW;
+import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 
@@ -34,6 +35,13 @@ public class GLUtils {
         GL20.glGetIntegerv(GL30.GL_DRAW_FRAMEBUFFER_BINDING, oldFramebufferId);
 
         return oldFramebufferId[0];
+    }
+
+    public static int getMaxTextureSize() {
+        int[] maxTextureSize = new int[1];
+        GL11.glGetIntegerv(GL11.GL_MAX_TEXTURE_SIZE, maxTextureSize);
+
+        return maxTextureSize[0];
     }
 
     public static double getMousePosX(long window) {

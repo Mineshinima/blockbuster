@@ -7,8 +7,6 @@ import org.joml.Math;
 public class WindowHandler {
     private static boolean overwriteMinecraft;
     private static Runnable resizingQueued;
-    private static int maxWidth = 8000;
-    private static int maxHeight = 8000;
 
     /**
      * Call this after everything has been rendered to avoid lags when resizing during rendering process.
@@ -36,7 +34,8 @@ public class WindowHandler {
     public static void queueResize(int width, int height) {
         resizingQueued = () -> {
             Object window = Minecraft.getInstance().getWindow();
-            ((IMixinWindow) window).resize(Math.clamp(1, Integer.MAX_VALUE, width), Math.clamp(1, Integer.MAX_VALUE, height));
+            ((IMixinWindow) window).resize(Math.clamp(1, GLUtils.getMaxTextureSize(), width),
+                    Math.clamp(1, GLUtils.getMaxTextureSize(), height));
         };
     }
 
@@ -48,6 +47,7 @@ public class WindowHandler {
         int height = GLUtils.getGLFWWindowSize(Minecraft.getInstance().getWindow().getWindow())[1];
 
         Object window = Minecraft.getInstance().getWindow();
-        ((IMixinWindow) window).resize(Math.clamp(1, Integer.MAX_VALUE, width), Math.clamp(1, Integer.MAX_VALUE, height));
+        ((IMixinWindow) window).resize(Math.clamp(1, GLUtils.getMaxTextureSize(), width),
+                Math.clamp(1, GLUtils.getMaxTextureSize(), height));
     }
 }
