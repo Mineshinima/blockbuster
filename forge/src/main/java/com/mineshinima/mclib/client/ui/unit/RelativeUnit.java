@@ -1,6 +1,7 @@
 package com.mineshinima.mclib.client.ui.unit;
 
 public class RelativeUnit extends AbsoluteUnit {
+    private int offset;
 
     public RelativeUnit(float value) {
         this.setValue(value);
@@ -16,6 +17,14 @@ public class RelativeUnit extends AbsoluteUnit {
         }
 
         return super.getValueInt();
+    }
+
+    public int getOffset() {
+        return this.offset;
+    }
+
+    public void setOffset(int offset) {
+        this.offset = offset;
     }
 
     public void setValue(float value) {

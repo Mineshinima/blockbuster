@@ -204,11 +204,11 @@ public class UITransformation<T extends UIElement> {
         int[] paddings = this.calculatePaddings();
 
         if (widthAuto) {
-            this.width.setValue(childrenResult.maxWidth + paddings[1] + paddings[3] + 2 * this.border.getValueInt());
+            this.width.setValue(childrenResult.maxWidth + paddings[1] + paddings[3] + 2 * this.border.getValueInt() + this.width.getOffset());
         }
 
         if (heightAuto) {
-            this.height.setValue(childrenResult.totalHeight + paddings[0] + paddings[2]);
+            this.height.setValue(childrenResult.totalHeight + paddings[0] + paddings[2] + this.height.getOffset());
         }
 
         if (autoDimensions) {
@@ -479,9 +479,9 @@ public class UITransformation<T extends UIElement> {
              * e.g. 4 * 25% width elements might not always fit in one row
              * TODO floor fixes this but could in theory lead to 1 pixel inconsistencies
              */
-            return (int) Math.floor(relative * unit.getValue());
+            return (int) Math.floor(relative * unit.getValue()) + unit.getOffset();
         } else if (unit.getType() == UnitType.PIXEL) {
-            return (int) unit.getValue();
+            return (int) unit.getValue() + unit.getOffset();
         } else {
             return 0;
         }

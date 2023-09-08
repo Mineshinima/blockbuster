@@ -12,12 +12,14 @@ public class UIPanel extends UIElement {
     public UIPanel(UIElement navbar, UIElement body) {
         this.width(1F).height(1F);
 
+        int navbarHeight = 50;
+
         this.navbar = new UIScrollElement()
                 .scrollDirection(Orientation.HORIZONTAL)
                 .overlayScrollbar(false)
                 .wrap(false)
                 .width(1F)
-                .height(50)
+                .height(navbarHeight)
                 .paddingBottom(10)
                 .paddingTop(10)
                 .paddingLeft(10)
@@ -39,6 +41,7 @@ public class UIPanel extends UIElement {
         this.body = body
                 .width(1F)
                 .height(1F)
+                .heightOffset(-navbarHeight)
                 .backgroundColor(0F,0F,0F,0F);
 
         //TODO we need a GridResizer thing like in McLib that distributes the children space because the body must take up all the left space

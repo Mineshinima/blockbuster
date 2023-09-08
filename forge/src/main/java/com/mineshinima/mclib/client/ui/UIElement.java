@@ -181,6 +181,11 @@ public class UIElement {
         return this;
     }
 
+    public UIElement widthOffset(int value) {
+        this.getTransformation().getWidth().setOffset(value);
+        return this;
+    }
+
     public UIElement width(float value) {
         this.getTransformation().getWidth().setValue(value);
         return this;
@@ -203,6 +208,11 @@ public class UIElement {
 
     public UIElement height(int value) {
         this.getTransformation().getHeight().setValue(value);
+        return this;
+    }
+
+    public UIElement heightOffset(int value) {
+        this.getTransformation().getHeight().setOffset(value);
         return this;
     }
 
