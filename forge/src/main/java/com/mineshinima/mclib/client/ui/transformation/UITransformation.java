@@ -9,7 +9,7 @@ import com.mineshinima.mclib.client.ui.unit.Unit;
 import com.mineshinima.mclib.client.ui.unit.UnitType;
 
 import javax.annotation.Nullable;
-import java.util.List;
+import java.util.*;
 
 //TODO
 //an option how borders should be handled -> should the border be overlaying or should it push the content
@@ -199,13 +199,12 @@ public class UITransformation<T extends UIElement> {
             this.apply(parentRow);
         }
 
-        DocumentFlowRow childrenRow = new DocumentFlowRow();
-        ChildrenResult childrenResult = this.traverseChildren(childrenRow);
+        ChildrenResult childrenResult = this.traverseChildren();
 
         int[] paddings = this.calculatePaddings();
 
-        if (widthAuto && !childrenResult.rowBreak) {
-            this.width.setValue(childrenRow.getWidth() + paddings[1] + paddings[3]);
+        if (widthAuto) {
+            this.width.setValue(childrenResult.maxWidth + paddings[1] + paddings[3] + 2 * this.border.getValueInt());
         }
 
         if (heightAuto) {
@@ -229,7 +228,7 @@ public class UITransformation<T extends UIElement> {
              * dimensions influence the document flow which influences the position,
              * so the children need to be recalculated
              */
-            this.traverseChildren(new DocumentFlowRow());
+            this.traverseChildren();
         }
 
         if (widthAuto) {
@@ -262,10 +261,12 @@ public class UITransformation<T extends UIElement> {
         }
     }
 
-    protected ChildrenResult traverseChildren(DocumentFlowRow flowRow) {
+    protected ChildrenResult traverseChildren() {
         boolean rowBreak = false;
         int totalHeight = 0;
         int maxWidth = 0;
+        DocumentFlowRow flowRow = new DocumentFlowRow();
+        Set<DocumentFlowRow> rows = new LinkedHashSet<>();
         List<UIElement> children = this.target.getChildren();
 
         for (int i = 0; i < children.size(); i++) {
@@ -275,7 +276,8 @@ public class UITransformation<T extends UIElement> {
             if (flowRow.isEnd()) {
                 maxWidth = Math.max(flowRow.getWidth(), maxWidth);
                 totalHeight += flowRow.getMaxHeight();
-                flowRow.reset();
+                rows.add(flowRow);
+                flowRow = new DocumentFlowRow();
                 rowBreak = true;
             }
 
@@ -286,17 +288,18 @@ public class UITransformation<T extends UIElement> {
             if (i == children.size() - 1) {
                 totalHeight += flowRow.getMaxHeight();
                 maxWidth = Math.max(flowRow.getWidth(), maxWidth);
+                rows.add(flowRow);
             }
         }
 
-        return new ChildrenResult(rowBreak, totalHeight, maxWidth);
+        return new ChildrenResult(rowBreak, totalHeight, maxWidth, new ArrayList<>(rows));
     }
 
     /**
      * Calculates the areas for this target element. Traverse the UI tree and call this method.
      * @param row
      */
-    private void apply(@Nullable final DocumentFlowRow row) {
+    protected void apply(@Nullable final DocumentFlowRow row) {
         final Area parentInnerArea = this.getParentInnerArea();
 
         /**
@@ -533,11 +536,13 @@ public class UITransformation<T extends UIElement> {
         private boolean rowBreak;
         private int totalHeight;
         private int maxWidth;
+        private final List<DocumentFlowRow> rows = new ArrayList<>();
 
-        public ChildrenResult(boolean rowBreak, int totalHeight, int maxWidth) {
+        public ChildrenResult(boolean rowBreak, int totalHeight, int maxWidth, List<DocumentFlowRow> rows) {
             this.totalHeight = totalHeight;
             this.rowBreak = rowBreak;
             this.maxWidth = maxWidth;
+            this.rows.addAll(rows);
         }
 
         public boolean isRowBreak() {
@@ -550,6 +555,10 @@ public class UITransformation<T extends UIElement> {
 
         public int getMaxWidth() {
             return this.maxWidth;
+        }
+
+        public List<DocumentFlowRow> getRows() {
+            return new ArrayList<>(this.rows);
         }
     }
 }

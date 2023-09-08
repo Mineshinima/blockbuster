@@ -51,11 +51,11 @@ public class UIScrollTransformation extends UITransformation<UIScrollElement> {
     }
 
     public void scroll() {
-        this.traverseChildren(new DocumentFlowRow());
+        this.traverseChildren();
     }
 
     @Override
-    protected ChildrenResult traverseChildren(DocumentFlowRow flowRow) {
+    protected ChildrenResult traverseChildren() {
         Area offsetInnerArea = this.target.getInnerArea();
 
         /*
@@ -71,7 +71,7 @@ public class UIScrollTransformation extends UITransformation<UIScrollElement> {
 
         this.target.setAreas(this.target.getFlowArea(), this.target.getBorderArea(), this.target.getContentArea(), offsetInnerArea);
 
-        ChildrenResult result = super.traverseChildren(flowRow);
+        ChildrenResult result = super.traverseChildren();
 
         offsetInnerArea.addX(-this.target.getScrollX());
         offsetInnerArea.addY(-this.target.getScrollY());
