@@ -53,12 +53,6 @@ public class UIElement {
      */
     protected boolean overflow = true;
     /**
-     * A cache set when this element performs scissoring during {@link #render(UIContext)} to cut off children.
-     * This will be the global scissoring area influenced by previous scissoring operations.
-     */
-    @Nullable
-    private Area globalScissorArea;
-    /**
      * This is a cache that will be set after the areas have been calculated.
      * Caching such an attribute will save some performance instead of going through the tree every render frame.
      *
@@ -337,15 +331,49 @@ public class UIElement {
      */
 
     /**
-     * @return a scissoring area if a parent or this has a global scissoring area set,
-     *         otherwise an empty Optional will be returned.
+     * Goes through the tree and intersects all scissoring areas returned by {@link #getScissoringArea()},
+     * including of this element.
+     * @return the global scissoring area when all parents have scissored too.
      */
     public Optional<Area> getGlobalScissoringArea() {
-        if (this.globalScissorArea != null) return Optional.of(this.globalScissorArea);
+        if (this.parent == null) {
+            return this.getScissoringArea().isPresent() ? Optional.of(this.getScissoringArea().get()) : Optional.empty();
+        }
 
-        if (this.parent != null) return this.parent.getGlobalScissoringArea();
+        Optional<Area> parentScissoring = this.parent.getGlobalScissoringArea();
+        Optional<Area> currentScissoring = this.getScissoringArea();
+
+        if (parentScissoring.isPresent() && currentScissoring.isPresent()) {
+            return Optional.of(parentScissoring.get().intersect(currentScissoring.get()));
+        } else if (parentScissoring.isPresent()) {
+            return parentScissoring;
+        } else if (currentScissoring.isPresent()) {
+            return currentScissoring;
+        }
 
         return Optional.empty();
+    }
+
+    /**
+     * Tests whether the coordinates are inside the provided test area
+     * that has been scissored by the global scissoring of the parents.
+     * @param test
+     * @param x
+     * @param y
+     * @return
+     */
+    protected boolean isInsideScissored(Area test, double x, double y) {
+        Optional<Area> parentScissor = this.parent != null ? this.parent.getGlobalScissoringArea() : Optional.empty();
+
+        if (parentScissor.isPresent()) {
+            if (!parentScissor.get().intersects(test))  {
+                return false;
+            }
+
+            return parentScissor.get().intersect(test).isInside(x, y);
+        }
+
+        return test.isInside(x, y);
     }
 
     /**
@@ -360,20 +388,18 @@ public class UIElement {
 
     /**
      * This method checks if this element can be rendered in general. This includes visibility, display type
-     * and whether this element is completely outside a parent element with overflow set to false.
+     * and whether this element is outside the global scissoring by the parents.
      * @return false if this element cannot be rendered.
      */
     public final boolean canRender() {
         if (!this.isVisible()) return false;
 
-        UIElement parent = this.parent;
+        if (this.parent != null) {
+            Optional<Area> parentGlobalScissor = this.parent.getGlobalScissoringArea();
 
-        while (parent != null) { //TODO CANRENDER SCISSORING SUS - it doesn't take into account scissoring of scissoring areas - cannot use globalScissor tho
-            if (!parent.overflow && !parent.contentArea.intersects(this.contentArea)) {
+            if (parentGlobalScissor.isPresent() && !this.borderArea.intersects(parentGlobalScissor.get())) {
                 return false;
             }
-
-            parent = parent.parent;
         }
 
         return true;
@@ -574,10 +600,7 @@ public class UIElement {
         this.preRender(context);
 
         if (this.getScissoringArea().isPresent()) {
-            Area scissor = this.getScissoringArea().get();
-            this.globalScissorArea = context.getUIGraphics().scissor(scissor);
-        } else {
-            this.globalScissorArea = null;
+            context.getUIGraphics().scissor(this.getScissoringArea().get());
         }
 
         for (UIElement child : this.getChildren()) {
@@ -788,12 +811,7 @@ public class UIElement {
      * @return true if the mouse is inside the area which takes into account any global scissoring area.
      */
     public boolean isMouseOver(UIContext context) {
-        if (this.getGlobalScissoringArea().isPresent()) {
-            Area scissor = this.getGlobalScissoringArea().get(); //TODO the scissoring here is also not correct - it needs to be scissoring of the parent
-            return this.borderArea.intersect(scissor).isInside(context.getMouseX(), context.getMouseY());
-        }
-
-        return this.borderArea.isInside(context.getMouseX(), context.getMouseY());
+        return this.isInsideScissored(this.contentArea, context.getMouseX(), context.getMouseY());
     }
 
     public void mouseMoved(UIContext context) {
