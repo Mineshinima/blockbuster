@@ -187,7 +187,7 @@ public class UIScrollElement extends UIElement {
 
     @Override
     public boolean postRenderedMouseClick(UIContext context) {
-        if (this.scrollDirection == null && this.contentArea.isInside(context.getMouseX(), context.getMouseY())
+        if (this.scrollDirection == null && this.isMouseOver(context)
                 && context.isMiddleMouseKey()) {
             this.dragVertical = true;
             this.dragHorizontal = true;
@@ -203,20 +203,22 @@ public class UIScrollElement extends UIElement {
         Area barSpace = new Area(horizontalContainer.getEndX(), horizontalContainer.getY(), verticalContainer.getWidth(), horizontalContainer.getHeight());
 
         /* clicking on the space when scrolling is both vertical and horizontal */
-        if (this.scrollDirection == null && barSpace.isInside(context.getMouseX(), context.getMouseY())) {
+        if (this.scrollDirection == null && this.isInsideScissored(barSpace, context.getMouseX(), context.getMouseY())) {
             this.scrollTo(-this.maxHorizontalScrollOffset(), -this.maxVerticalScrollOffset());
             this.clicked = true;
             return true;
         }
 
         /* clicking on the scrollbars */
-        if (horizontalScrollbar != null && horizontalScrollbar.isInside(context.getMouseX(), context.getMouseY())) {
+        if (horizontalScrollbar != null
+                && this.isInsideScissored(horizontalScrollbar, context.getMouseX(), context.getMouseY())) {
             this.dragHorizontal = true;
             this.dragHorizontalOffset = (int) (context.getMouseX() - horizontalScrollbar.getX());
             return true;
         }
 
-        if (verticalScrollbar != null && verticalScrollbar.isInside(context.getMouseX(), context.getMouseY())) {
+        if (verticalScrollbar != null
+                && this.isInsideScissored(verticalScrollbar, context.getMouseX(), context.getMouseY())) {
             this.dragVertical = true;
             this.dragVerticalOffset = (int) (context.getMouseY() - verticalScrollbar.getY());
             return true;
@@ -224,12 +226,14 @@ public class UIScrollElement extends UIElement {
 
         /* clicking on the scroll container to jump to a position */
         if (!this.overlayScrollbar) {
-            if (this.verticalScrollbarContainer().isInside(context.getMouseX(), context.getMouseY()) && verticalScrollbar != null) {
+            if (verticalScrollbar != null
+                    && this.isInsideScissored(this.verticalScrollbarContainer(), context.getMouseX(), context.getMouseY())) {
                 this.dragVertical = true;
                 this.dragVerticalOffset = (int) (verticalScrollbar.getHeight() / 2F);
                 this.dragY(context.getMouseY() - verticalScrollbar.getHeight() / 2F);
                 return true;
-            } else if (this.horizontalScrollbarContainer().isInside(context.getMouseX(), context.getMouseY()) && horizontalScrollbar != null) {
+            } else if (horizontalScrollbar != null
+                    && this.isInsideScissored(this.horizontalScrollbarContainer(), context.getMouseX(), context.getMouseY())) {
                 this.dragHorizontal = true;
                 this.dragHorizontalOffset = (int) (horizontalScrollbar.getWidth() / 2F);
                 this.dragX(context.getMouseX() - horizontalScrollbar.getWidth() / 2F);
@@ -258,7 +262,7 @@ public class UIScrollElement extends UIElement {
 
     @Override
     public boolean mouseScroll(UIContext context) {
-        if (!this.contentArea.isInside(context.getMouseX(), context.getMouseY()) || this.scrollDirection == null) {
+        if (!this.isMouseOver(context) || this.scrollDirection == null) {
             return false;
         }
 

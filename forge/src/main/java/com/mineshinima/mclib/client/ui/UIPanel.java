@@ -44,7 +44,6 @@ public class UIPanel extends UIElement {
                 .heightOffset(-navbarHeight)
                 .backgroundColor(0F,0F,0F,0F);
 
-        //TODO we need a GridResizer thing like in McLib that distributes the children space because the body must take up all the left space
         this.addChildren(this.navbar, this.body);
         this.background = new Color(0,0,0,0);
     }
