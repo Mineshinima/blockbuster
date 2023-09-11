@@ -39,8 +39,9 @@ public class UITransformation<T extends UIElement> {
     private RelativeUnit[] padding = new RelativeUnit[]{new RelativeUnit(0), new RelativeUnit(0), new RelativeUnit(0), new RelativeUnit(0)};
     /**
      * margin: top, right, bottom, left
+     * currently only margin left supports auto
      */
-    private RelativeUnit[] margin = new RelativeUnit[]{new RelativeUnit(0), new RelativeUnit(0), new RelativeUnit(0), new RelativeUnit(0)};
+    private RelativeUnit[] margin = new RelativeUnit[]{new RelativeUnit(0), new Unit(0), new RelativeUnit(0), new Unit(0)};
     private final int[] calculatedMargin = new int[4];
     private DISPLAY display = DISPLAY.INLINE_BLOCK;
 
@@ -142,16 +143,16 @@ public class UITransformation<T extends UIElement> {
         return this.margin[0];
     }
 
-    public RelativeUnit getMarginRight() {
-        return this.margin[1];
+    public Unit getMarginRight() {
+        return (Unit) this.margin[1];
     }
 
     public RelativeUnit getMarginBottom() {
         return this.margin[2];
     }
 
-    public RelativeUnit getMarginLeft() {
-        return this.margin[3];
+    public Unit getMarginLeft() {
+        return (Unit) this.margin[3];
     }
 
     public DISPLAY getDisplay() {
@@ -324,7 +325,7 @@ public class UITransformation<T extends UIElement> {
         this.calculatedMargin[2] = margin[2];
         this.calculatedMargin[3] = margin[3];
 
-        this.setFlowAreaDimensions(flowArea, borderArea, margin);
+        this.setFlowAreaDimensions(flowArea, borderArea, this.calculatedMargin);
 
         root.setX(parentInnerArea.getX());
         root.setY(parentInnerArea.getY());
@@ -335,7 +336,18 @@ public class UITransformation<T extends UIElement> {
         int y = this.calculatePixels(borderArea.getHeight(), this.y) - anchorY;
 
         if (this.position == POSITION.RELATIVE) {
-            if (row != null) this.calculateDocumentFlow(row, flowArea, borderArea, contentArea, innerArea);
+            if (row != null) {
+                this.calculateDocumentFlow(row, flowArea, borderArea, contentArea, innerArea);
+
+                Integer[] autoMargins = this.calculateAutoMargins(borderArea, row);
+
+                this.calculatedMargin[0] = autoMargins[0] != null ? autoMargins[0] : this.calculatedMargin[0];
+                this.calculatedMargin[1] = autoMargins[1] != null ? autoMargins[1] : this.calculatedMargin[1];
+                this.calculatedMargin[2] = autoMargins[2] != null ? autoMargins[2] : this.calculatedMargin[2];
+                this.calculatedMargin[3] = autoMargins[3] != null ? autoMargins[3] : this.calculatedMargin[3];
+
+                this.setFlowAreaDimensions(flowArea, borderArea, this.calculatedMargin);
+            }
 
             /* offset the position */
             borderNode.addX(x);
@@ -351,8 +363,8 @@ public class UITransformation<T extends UIElement> {
 
         final int borderWidth = this.getBorder().getValueInt();
 
-        borderNode.addX(margin[3]);
-        borderNode.addY(margin[0]);
+        borderNode.addX(this.calculatedMargin[3]);
+        borderNode.addY(this.calculatedMargin[0]);
         contentNode.addX(borderWidth);
         contentNode.addY(borderWidth);
 
@@ -362,17 +374,17 @@ public class UITransformation<T extends UIElement> {
         this.calculatedPadding[2] = padding[2];
         this.calculatedPadding[3] = padding[3];
 
-        this.setInnerAreaDimensions(innerArea, contentArea, padding);
+        this.setInnerAreaDimensions(innerArea, contentArea, this.calculatedPadding);
 
-        innerNode.addX(padding[3]);
-        innerNode.addY(padding[0]);
+        innerNode.addX(this.calculatedPadding[3]);
+        innerNode.addY(this.calculatedPadding[0]);
 
         this.target.setAreas(flowArea, borderArea, contentArea, innerArea);
     }
 
     /**
-     * Calculates the document flow of the given root area.
-     * This method modifies the positions of the areas in the given chain.
+     * Calculates the document flow of the given areas.
+     * This method modifies the positions of the areas.
      *
      * If it fits besides the previous elements in the given row, it will be placed in the row, if not, the row will end,
      * and it will flow into a new row.
@@ -414,6 +426,37 @@ public class UITransformation<T extends UIElement> {
         int marginRight = this.calculatePixels(parentInnerArea.getWidth(), this.getMarginRight());
 
         return new int[]{marginTop, marginRight, marginBottom, marginLeft};
+    }
+
+    protected Integer[] calculateAutoMargins(Area borderArea, DocumentFlowRow row) {
+        if (this.getMarginLeft().getType() != UnitType.AUTO && this.getMarginRight().getType() != UnitType.AUTO) {
+            return new Integer[]{null, null, null, null};
+        }
+
+        final Area parentInnerArea = this.getParentInnerArea();
+
+        int available0 = parentInnerArea.getWidth() - borderArea.getWidth();
+
+        if (!row.isEnd()) {
+            available0 -= row.getWidth();
+        }
+
+        available0 = Math.max(available0, 0);
+        int available = available0;
+        Integer leftMargin = null, rightMargin = null;
+
+        if (this.getMarginLeft().getType() == UnitType.AUTO && this.getMarginRight().getType() == UnitType.AUTO) {
+            available /= 2;
+            rightMargin = available0 - available;
+        } else if (this.getMarginRight().getType() == UnitType.AUTO) {
+            rightMargin = available;
+        }
+
+        if (this.getMarginLeft().getType() == UnitType.AUTO) {
+            leftMargin = available;
+        }
+
+        return new Integer[]{null, rightMargin, null, leftMargin};
     }
 
     protected int[] calculatePaddings() {

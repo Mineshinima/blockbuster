@@ -301,6 +301,11 @@ public class UIElement {
         return this;
     }
 
+    public UIElement marginRightAuto() {
+        this.getTransformation().getMarginRight().setAuto();
+        return this;
+    }
+
     public UIElement marginBottom(float value) {
         this.getTransformation().getMarginBottom().setValue(value);
         return this;
@@ -321,6 +326,11 @@ public class UIElement {
         return this;
     }
 
+    public UIElement marginLeftAuto() {
+        this.getTransformation().getMarginLeft().setAuto();
+        return this;
+    }
+
     public UIElement wrap(boolean wrap) {
         this.getTransformation().setWrap(wrap);
         return this;
@@ -337,7 +347,7 @@ public class UIElement {
      */
     public Optional<Area> getGlobalScissoringArea() {
         if (this.parent == null) {
-            return this.getScissoringArea().isPresent() ? Optional.of(this.getScissoringArea().get()) : Optional.empty();
+            return this.getScissoringArea();
         }
 
         Optional<Area> parentScissoring = this.parent.getGlobalScissoringArea();

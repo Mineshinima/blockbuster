@@ -13,7 +13,6 @@ public class UIContext {
     private final Window window;
     private final UIScreen screen;
     private final Map<Integer, UIElement> clickEvents = new HashMap<>();
-    //TODO mouse as int? GLFW returns double, and Minecraft returns double because it converts it to GUI space... but we use global
     private UIGraphics graphics;
     private double mouseX;
     private double mouseY;

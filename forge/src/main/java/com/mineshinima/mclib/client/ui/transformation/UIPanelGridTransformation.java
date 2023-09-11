@@ -20,9 +20,9 @@ public class UIPanelGridTransformation extends UITransformation<UIPanelGrid> {
     @Override
     protected int calculatePixels(int relative, RelativeUnit unit) {
         if (unit.getType() == UnitType.PERCENTAGE) {
-            return (int) Math.round(relative * unit.getValue());
+            return Math.round(relative * unit.getValue()) + unit.getOffset();
         } else {
-            return (int) unit.getValue();
+            return (int) unit.getValue() + unit.getOffset();
         }
     }
 }
