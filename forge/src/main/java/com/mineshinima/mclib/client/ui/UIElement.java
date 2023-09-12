@@ -470,6 +470,7 @@ public class UIElement {
     public void removeChild(UIElement child) {
         this.children.remove(child);
         child.parent = null;
+        child.onClose();
         //TODO should the manipulation of children already resize the tree? Possibly bad performance wise when building a UI
         this.getRoot().resize(new DocumentFlowRow());
     }
@@ -481,6 +482,7 @@ public class UIElement {
         if (this.parent != null) {
             this.parent.removeChild(this);
             this.parent = null;
+            this.onClose();
         }
     }
 
@@ -497,6 +499,7 @@ public class UIElement {
             this.children.set(this.children.indexOf(child), replacement);
             replacement.parent = this;
             child.parent = null;
+            child.onClose();
 
             this.getRoot().resize(new DocumentFlowRow());
         }

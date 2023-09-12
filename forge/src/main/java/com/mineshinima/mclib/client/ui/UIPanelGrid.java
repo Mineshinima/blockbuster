@@ -137,6 +137,7 @@ public class UIPanelGrid extends UIElement {
     public void setPanel(UIPanel panel) {
         if (this.panel != null) {
             this.panel.parent = null;
+            this.panel.onClose();
         }
 
         this.panel = panel;
@@ -145,8 +146,14 @@ public class UIPanelGrid extends UIElement {
         this.borderColor(0,0,0,1);
         this.borderWidth(this.borderWidth);
 
-        if (this.grid0 != null) this.grid0.parent = null;
-        if (this.grid1 != null) this.grid1.parent = null;
+        if (this.grid0 != null) {
+            this.grid0.parent = null;
+            this.grid0.onClose();
+        }
+        if (this.grid1 != null) {
+            this.grid1.parent = null;
+            this.grid1.onClose();
+        }
 
         this.grid0 = null;
         this.grid1 = null;
@@ -199,11 +206,13 @@ public class UIPanelGrid extends UIElement {
         if (replacement instanceof UIPanelGrid) {
             if (child == this.grid0) {
                 this.grid0.parent = null;
+                this.grid0.onClose();
                 this.grid0 = (UIPanelGrid) replacement;
                 this.grid0.parent = this;
                 this.getRoot().resize(new DocumentFlowRow());
             } else if (child == this.grid1) {
                 this.grid1.parent = null;
+                this.grid1.onClose();
                 this.grid1 = (UIPanelGrid) replacement;
                 this.grid1.parent = this;
                 this.getRoot().resize(new DocumentFlowRow());
@@ -272,7 +281,7 @@ public class UIPanelGrid extends UIElement {
                     grid0Area.getY() - 2, this.grid0.borderWidth + this.grid1.borderWidth + 4, grid0Area.getHeight() + 4);
         }
 
-        return intersectionLine.isInside(x, y);
+        return this.isInsideScissored(intersectionLine, x, y);
     }
 
     /**
