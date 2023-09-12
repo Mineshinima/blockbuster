@@ -59,6 +59,10 @@ public class UIElement {
      * This is dependent on overflow, display type and visibility -> if they change, this needs to update!
      */
     protected boolean canRender;
+    /**
+     * false when this element was never rendered or closed.
+     */
+    private boolean shown;
 
     /*
      * STYLE ATTRIBUTES
@@ -437,7 +441,6 @@ public class UIElement {
         return element;
     }
 
-    @Nullable
     public Optional<UIContext> getRootContext() {
         if (this.getRoot() instanceof UIRootElement) {
             return Optional.of(((UIRootElement) this.getRoot()).getScreen().getContext());
@@ -587,6 +590,7 @@ public class UIElement {
      * This gets called when the UIElement is closed.
      */
     public final void onClose() {
+        this.shown = false;
         this._onClose();
 
         for (UIElement element : this.getChildren()) {
@@ -600,6 +604,22 @@ public class UIElement {
     protected void _onClose() { }
 
     /**
+     * This gets called when the UIElement is rendered for the first time.
+     */
+    public final void onShow() {
+        this._onShow();
+
+        for (UIElement element : this.getChildren()) {
+            element.onShow();
+        }
+    }
+
+    /**
+     * This method is supposed to be overridden to define logic to happen when the UI is shown.
+     */
+    protected void _onShow() { }
+
+    /**
      * Good old template pattern<br><br>
      *
      * This is final to enforce the order of rendering and the order of template methods.
@@ -609,6 +629,10 @@ public class UIElement {
      */
     public final void render(UIContext context) {
         if (!this.canRender) return;
+
+        if (!this.shown) this.onShow();
+
+        this.shown = true;
 
         this.preRender(context);
 
