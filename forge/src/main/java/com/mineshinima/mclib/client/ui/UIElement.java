@@ -5,7 +5,6 @@ import com.mineshinima.mclib.utils.Color;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,11 +44,22 @@ public class UIElement {
     protected Color background = new Color((float) Math.random(), (float) Math.random(), (float) Math.random(), 1F);
     protected Color borderColor = new Color((float) Math.random(), (float) Math.random(), (float) Math.random(), 1F);
     private final List<UIElement> children = new ArrayList<>();
+    /**
+     * <b>Important when removing an element from the tree:</b><br>
+     * When you set the parent to null with the intention of removing an element from the tree,
+     * you need to call {@link #onClose()}!
+     * <br> If you don't do this, it will lead to memory leaks
+     * when elements expect a close call, for example, to unregister EventListeners.
+     */
     protected UIElement parent;
+    /**
+     * Whether the element, and children, will be rendered.<br>
+     * The element will still contribute to the document flow.
+     */
     protected boolean visible = true;
     /**
-     * Whether the children that are outside of this contentArea can be rendered
-     * true means children can render outside.
+     * Whether the children that are outside of {@link #contentArea} can be rendered.
+     * true means children can render outside. See {@link #getScissoringArea()}.
      */
     protected boolean overflow = true;
     /**
@@ -60,7 +70,7 @@ public class UIElement {
      */
     protected boolean canRender;
     /**
-     * false when this element was never rendered or closed.
+     * True after the first time rendering, or after the first time rendering after being closed by {@link #onClose()}
      */
     private boolean shown;
 
@@ -99,6 +109,7 @@ public class UIElement {
      * This is especially needed when overflow changes, as it influences the render ability of the children.
      */
     protected void updateChildrenCanRender() {
+        //TODO possible bug: if scissoring area changes - maybe caching is not stable enough for the future.
         this.canRender = this.canRender();
 
         for (UIElement child : this.getChildren()) {
@@ -346,8 +357,8 @@ public class UIElement {
 
     /**
      * Goes through the tree and intersects all scissoring areas returned by {@link #getScissoringArea()},
-     * including of this element.
-     * @return the global scissoring area when all parents have scissored too.
+     * including this element.
+     * @return the global scissoring area when all parents and this have scissored too.
      */
     public Optional<Area> getGlobalScissoringArea() {
         if (this.parent == null) {
