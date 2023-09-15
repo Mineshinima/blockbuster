@@ -28,4 +28,21 @@ public class MathUtils {
     public static<T extends Comparable> T min(T a, T b) {
         return a.compareTo(b) < 0 ? a : b;
     }
+
+    public static float mapRange(float value, float min, float max, float toMin, float toMax) {
+        return mapRange(value, min, max, toMin, toMax, true);
+    }
+
+    public static float mapRange(float value, float min, float max, float toMin, float toMax, boolean clamp) {
+        return (float) mapRange((double) value, min, max, toMin, toMax, clamp);
+    }
+
+    public static double mapRange(double value, double min, double max, double toMin, double toMax) {
+        return mapRange(value, min, max, toMin, toMax, true);
+    }
+
+    public static double mapRange(double value, double min, double max, double toMin, double toMax, boolean clamp) {
+        double converted = (value - min) / (max - min) * (toMax - toMin) + toMin;
+        return clamp ? MathUtils.clamp(converted, toMin, toMax) : converted;
+    }
 }
