@@ -8,7 +8,8 @@
   ],
   "client": [
     "MixinWindow",
-    "MixinMinecraft"
+    "MixinMinecraft",
+    "MixinGameRenderer"
   ],
   "injectors": {
     "defaultRequire": 1
