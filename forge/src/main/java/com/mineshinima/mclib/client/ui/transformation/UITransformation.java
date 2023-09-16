@@ -338,15 +338,6 @@ public class UITransformation<T extends UIElement> {
         if (this.position == POSITION.RELATIVE) {
             if (row != null) {
                 this.calculateDocumentFlow(row, flowArea, borderArea, contentArea, innerArea);
-
-                Integer[] autoMargins = this.calculateAutoMargins(borderArea, row);
-
-                this.calculatedMargin[0] = autoMargins[0] != null ? autoMargins[0] : this.calculatedMargin[0];
-                this.calculatedMargin[1] = autoMargins[1] != null ? autoMargins[1] : this.calculatedMargin[1];
-                this.calculatedMargin[2] = autoMargins[2] != null ? autoMargins[2] : this.calculatedMargin[2];
-                this.calculatedMargin[3] = autoMargins[3] != null ? autoMargins[3] : this.calculatedMargin[3];
-
-                this.setFlowAreaDimensions(flowArea, borderArea, this.calculatedMargin);
             }
 
             /* offset the position */
@@ -360,6 +351,15 @@ public class UITransformation<T extends UIElement> {
             borderNode.addX(x);
             borderNode.addY(y);
         }
+
+        Integer[] autoMargins = this.calculateAutoMargins(borderArea, this.position == POSITION.RELATIVE ? row : null);
+
+        this.calculatedMargin[0] = autoMargins[0] != null ? autoMargins[0] : this.calculatedMargin[0];
+        this.calculatedMargin[1] = autoMargins[1] != null ? autoMargins[1] : this.calculatedMargin[1];
+        this.calculatedMargin[2] = autoMargins[2] != null ? autoMargins[2] : this.calculatedMargin[2];
+        this.calculatedMargin[3] = autoMargins[3] != null ? autoMargins[3] : this.calculatedMargin[3];
+
+        this.setFlowAreaDimensions(flowArea, borderArea, this.calculatedMargin);
 
         final int borderWidth = this.getBorder().getValueInt();
 
@@ -428,7 +428,7 @@ public class UITransformation<T extends UIElement> {
         return new int[]{marginTop, marginRight, marginBottom, marginLeft};
     }
 
-    protected Integer[] calculateAutoMargins(Area borderArea, DocumentFlowRow row) {
+    protected Integer[] calculateAutoMargins(Area borderArea, @Nullable DocumentFlowRow row) {
         if (this.getMarginLeft().getType() != UnitType.AUTO && this.getMarginRight().getType() != UnitType.AUTO) {
             return new Integer[]{null, null, null, null};
         }
@@ -437,7 +437,7 @@ public class UITransformation<T extends UIElement> {
 
         int available0 = parentInnerArea.getWidth() - borderArea.getWidth();
 
-        if (!row.isEnd()) {
+        if (row != null && !row.isEnd()) {
             available0 -= row.getWidth();
         }
 
