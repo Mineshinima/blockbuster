@@ -200,6 +200,7 @@ dependencies {
 // Readd if mixins start being used
 mixin {
     add sourceSets.main, "mixins.${project.modid}.refmap.json"
+    config "mixins.${project.modid}.json"
 
     debug.verbose = true
     debug.export = true

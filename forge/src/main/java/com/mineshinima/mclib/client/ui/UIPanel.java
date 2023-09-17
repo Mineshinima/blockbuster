@@ -36,7 +36,7 @@ public class UIPanel extends UIElement {
                 new UIElement().width(100).height(1F),
                 new UIElement().width(100).height(1F),
                 new UIElement().width(100).height(1F),
-                new UIElement().width(100).height(1F));
+                new UIElement().width(100).height(1F).marginLeftAuto().marginRightAuto());
 
         this.body = body
                 .width(1F)
@@ -70,6 +70,7 @@ public class UIPanel extends UIElement {
                 float ratio = (float) ((context.getMouseY() - this.contentArea.getY()) / this.contentArea.getHeight());
 
                 ((UIPanelGrid) this.parent).subdivide(Orientation.HORIZONTAL, ratio);
+                this.getRoot().resize(new DocumentFlowRow());
 
                 return true;
             }
@@ -78,6 +79,7 @@ public class UIPanel extends UIElement {
                 float ratio = (float) ((context.getMouseX() - this.contentArea.getX()) / this.contentArea.getWidth());
 
                 ((UIPanelGrid) this.parent).subdivide(Orientation.VERTICAL, ratio);
+                this.getRoot().resize(new DocumentFlowRow());
 
                 return true;
             }

@@ -122,8 +122,6 @@ public class UIPanelGrid extends UIElement {
             /* vertical elements shouldn't wrap. */
             this.wrap(false);
         }
-
-        this.getRoot().resize(new DocumentFlowRow());
     }
 
     public Optional<UIPanelGrid> getGrid0() {
@@ -209,13 +207,11 @@ public class UIPanelGrid extends UIElement {
                 this.grid0.onClose();
                 this.grid0 = (UIPanelGrid) replacement;
                 this.grid0.parent = this;
-                this.getRoot().resize(new DocumentFlowRow());
             } else if (child == this.grid1) {
                 this.grid1.parent = null;
                 this.grid1.onClose();
                 this.grid1 = (UIPanelGrid) replacement;
                 this.grid1.parent = this;
-                this.getRoot().resize(new DocumentFlowRow());
             }
         }
     }

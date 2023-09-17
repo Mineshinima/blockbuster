@@ -452,6 +452,11 @@ public class UIElement {
         return element;
     }
 
+    /**
+     * Gets the {@link UIContext} from the root element if it's present.<br>
+     * This is useful for scopes that don't naturally have access to {@link UIContext} through the method parameter.
+     * @return
+     */
     public Optional<UIContext> getRootContext() {
         if (this.getRoot() instanceof UIRootElement) {
             return Optional.of(((UIRootElement) this.getRoot()).getScreen().getContext());
@@ -462,14 +467,12 @@ public class UIElement {
 
     public void addChildren(UIElement... elements) {
         for (UIElement element : elements) {
-            //TODO this would call resize twice then (once in removeChild() and then in this method after adding)
             element.remove();
             element.parent = this;
         }
 
         this.children.addAll(Arrays.asList(elements));
-        //TODO if I think more about this, currently UI creation would do a lot of resizing and shit before it is even ready to be rendered...
-        this.getRoot().resize(new DocumentFlowRow());
+
     }
 
     /**
@@ -485,8 +488,6 @@ public class UIElement {
         this.children.remove(child);
         child.parent = null;
         child.onClose();
-        //TODO should the manipulation of children already resize the tree? Possibly bad performance wise when building a UI
-        this.getRoot().resize(new DocumentFlowRow());
     }
 
     /**
@@ -514,8 +515,6 @@ public class UIElement {
             replacement.parent = this;
             child.parent = null;
             child.onClose();
-
-            this.getRoot().resize(new DocumentFlowRow());
         }
     }
 
