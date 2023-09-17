@@ -26,6 +26,7 @@ public class KeyboardEventHandler {
                 Minecraft.getInstance().setScreen(screenTest);
                 break;
             case GLFW.GLFW_KEY_1:
+                screenTest.onClose();
                 screenTest = new UIScreen(Minecraft.getInstance());
                 Minecraft.getInstance().setScreen(screenTest);
                 break;

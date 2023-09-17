@@ -1,7 +1,7 @@
 package com.mineshinima.mclib.client.ui;
 
 import com.mineshinima.mclib.client.rendering.WindowHandler;
-import com.mineshinima.mclib.client.ui.space.Orientation;
+import com.mineshinima.mclib.client.ui.transformation.UITransformation;
 import com.mineshinima.mclib.client.ui.utils.UIGraphics;
 import com.mineshinima.mclib.utils.rendering.GLUtils;
 import com.mojang.blaze3d.platform.GlStateManager;
@@ -33,17 +33,6 @@ public class UIScreen extends Screen {
 
         UIPanelGrid rootGrid = new UIPanelGrid(this.root, new UIPanel(new UIElement(), new UIViewport()));
         rootGrid.width(1F).height(1F);
-        rootGrid.subdivide(Orientation.HORIZONTAL, 0.5F);
-        rootGrid.getGrid0().ifPresent(e -> e.subdivide(Orientation.VERTICAL, 0.25F));
-        rootGrid.getGrid0().flatMap(UIPanelGrid::getGrid0).ifPresent(x -> x.subdivide(Orientation.VERTICAL, 0.25F));
-        rootGrid.getGrid1().ifPresent(e -> e.subdivide(Orientation.VERTICAL, 0.25F));
-        /*
-         * When there is a UIViewport in the elements, you need to call onClose(), to reset viewport overwriting.
-         * so the instantiation of the UIScreen doesn't cause Minecraft rendering to freak out.
-         *
-         * Note: if this is instantiated on startup, and viewport resized the framebuffer, something might go wrong.
-         */
-        this.root.onClose();
     }
 
     public UIContext getContext() {
@@ -70,7 +59,6 @@ public class UIScreen extends Screen {
 
         this.root.onClose();
         this.context.renderDefaultCursor();
-        WindowHandler.resizeToWindowSize();
     }
 
     @Override
@@ -117,8 +105,9 @@ public class UIScreen extends Screen {
             this.context.renderPreparedCursor();
         }
 
+        RenderSystem.restoreProjectionMatrix();
+
         if (WindowHandler.isOverwriting()) {
-            RenderSystem.restoreProjectionMatrix();
             GlStateManager._glBindFramebuffer(GL_FRAMEBUFFER, oldFramebufferID);
         }
     }
