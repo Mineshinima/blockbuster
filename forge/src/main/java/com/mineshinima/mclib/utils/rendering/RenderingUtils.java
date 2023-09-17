@@ -14,6 +14,23 @@ import java.lang.Math;
 import java.util.List;
 
 public class RenderingUtils {
+    private static final Matrix4f cameraProjection = new Matrix4f();
+
+    /**
+     * Read and store the projection matrix used for rendering the world.
+     */
+    public static void mixinReadProjectionMatrix() {
+        cameraProjection.set(RenderSystem.getProjectionMatrix());
+    }
+
+    /**
+     * @return the stored projection matrix the world was rendered with.
+     * This is useful for scopes, like UI rendering, that don't have access to the world projection matrix.
+     */
+    public static Matrix4f getCameraProjection() {
+        return new Matrix4f(cameraProjection);
+    }
+
     public static void buildBillboard(BufferBuilder bufferBuilder, double x, double y, double z, double w, double h, float u, float v) {
         bufferBuilder.vertex(x + w, y, z).uv(u,v).endVertex();
         bufferBuilder.vertex(x, y, z).uv(0,v).endVertex();
@@ -56,8 +73,7 @@ public class RenderingUtils {
      */
     @Nullable
     public static Vector3d projectScreenOntoPlane(Vector3d cameraPos, double x, double y, Vector3d planeNormal, Vector3d planeOrigin) {
-        Matrix4d cameraToWorld = new Matrix4d(MatrixUtils.getCameraProjection())
-                .mul(new Matrix4f(RenderSystem.getInverseViewRotationMatrix()).invert()).invert();
+        Matrix4d cameraToWorld = MatrixUtils.toMatrix4d(RenderSystem.getInverseViewRotationMatrix()).mul(getCameraProjection().invert());
 
         Vector4d mouse = new Vector4d(x, y, 0, 1);
         cameraToWorld.transform(mouse);

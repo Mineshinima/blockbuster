@@ -1,6 +1,7 @@
 package com.mineshinima.mclib.mixins;
 
 import com.mineshinima.mclib.utils.MatrixUtils;
+import com.mineshinima.mclib.utils.rendering.RenderingUtils;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.GameRenderer;
 import org.spongepowered.asm.mixin.Mixin;
@@ -17,6 +18,6 @@ public abstract class MixinGameRenderer {
             value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;resetProjectionMatrix(Lorg/joml/Matrix4f;)V", shift = At.Shift.AFTER
     ))
     public void afterResetProjectionMatrix(float p_109090_, long p_109091_, PoseStack p_109092_, CallbackInfo ci) {
-        MatrixUtils.mixinReadProjectionMatrix();
+        RenderingUtils.mixinReadProjectionMatrix();
     }
 }
