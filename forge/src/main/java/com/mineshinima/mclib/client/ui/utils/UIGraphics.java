@@ -3,6 +3,7 @@ package com.mineshinima.mclib.client.ui.utils;
 import com.mineshinima.mclib.client.ui.Area;
 import com.mineshinima.mclib.utils.Color;
 import com.mineshinima.mclib.utils.rendering.GLUtils;
+import com.mineshinima.mclib.utils.rendering.RenderingUtils;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import net.minecraft.client.Minecraft;
@@ -118,13 +119,6 @@ public class UIGraphics {
     }
 
     public void buildUVQuad(BufferBuilder bufferBuilder, Area area) {
-        this.buildUVQuad(bufferBuilder, area.getX(), area.getY(), area.getEndX(), area.getEndY());
-    }
-
-    public void buildUVQuad(BufferBuilder bufferBuilder, int x0, int y0, int x1, int y1) {
-        bufferBuilder.vertex(x1, y0, 0).uv(1,1).endVertex();
-        bufferBuilder.vertex(x0, y0, 0).uv(0,1).endVertex();
-        bufferBuilder.vertex(x0, y1, 0).uv(0,0).endVertex();
-        bufferBuilder.vertex(x1, y1, 0).uv(1,0).endVertex();
+        RenderingUtils.buildBillboard(bufferBuilder, area.getX(), area.getY(), 0, area.getWidth(), area.getHeight(), 1F, 1F);
     }
 }
