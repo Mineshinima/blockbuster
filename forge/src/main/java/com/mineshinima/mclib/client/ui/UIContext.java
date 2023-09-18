@@ -1,6 +1,7 @@
 package com.mineshinima.mclib.client.ui;
 
 import com.mineshinima.mclib.client.ui.utils.UIGraphics;
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.Window;
 import net.minecraft.client.Minecraft;
 
@@ -19,7 +20,8 @@ public class UIContext {
     private double mouseScroll;
     private final Set<Integer> pressedMouseKeys = new HashSet<>();
     private int currentMouseKey;
-    private int keyboardKey;
+    private char typedChar;
+    private int currentKeyboardKey;
     private float partialTicks;
     /**
      * This cursor might not always be the cursor that is actually rendering.
@@ -98,11 +100,31 @@ public class UIContext {
     }
 
     public int getKeyboardKey() {
-        return this.keyboardKey;
+        return this.currentKeyboardKey;
     }
 
-    public void setKeyboardKey(int keyboardKey) {
-        this.keyboardKey = keyboardKey;
+    public void pressKeyboardKey(int keyboardKey) {
+        this.currentKeyboardKey = keyboardKey;
+    }
+
+    public void releaseKeyboardKey(int keyboardKey) {
+        this.currentKeyboardKey = keyboardKey;
+    }
+
+    public void typeChar(char typedChar) {
+        this.typedChar = typedChar;
+    }
+
+    public char getTypedChar() {
+        return this.typedChar;
+    }
+
+    /**
+     * @param keyboardKey see {@link org.lwjgl.glfw.GLFW} for the key constants
+     * @return whether the key is pressed
+     */
+    public boolean isKeyboardKeyDown(int keyboardKey) {
+        return InputConstants.isKeyDown(this.window.getWindow(), keyboardKey);
     }
 
     public double getMouseX() {
@@ -170,10 +192,10 @@ public class UIContext {
     }
 
     /**
-     * @return the currently holding mouse keys.
+     * @return true when the given mouseKey is being pressed still.
      */
-    public Set<Integer> getPressedMouseKeys() {
-        return new HashSet<>(this.pressedMouseKeys);
+    public boolean isMouseKeyDown(int mouseKey) {
+        return this.pressedMouseKeys.contains(mouseKey);
     }
 
     public void setPartialTicks(float partialTicks) {
@@ -184,12 +206,12 @@ public class UIContext {
      * This does not change the appearance of the cursor rendered.
      * After this method you need to still apply the cursor using {@link #renderPreparedCursor()}
      */
-    public void resetCursor() {
+    public void resetPreparedCursor() {
         this.glfwCursor = this.defaultGlfwCursor;
     }
 
     public void renderDefaultCursor() {
-        this.resetCursor();
+        this.resetPreparedCursor();
         this.renderPreparedCursor();
     }
 

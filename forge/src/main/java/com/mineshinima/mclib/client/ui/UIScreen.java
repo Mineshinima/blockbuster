@@ -1,7 +1,6 @@
 package com.mineshinima.mclib.client.ui;
 
 import com.mineshinima.mclib.client.rendering.WindowHandler;
-import com.mineshinima.mclib.client.ui.transformation.UITransformation;
 import com.mineshinima.mclib.client.ui.utils.UIGraphics;
 import com.mineshinima.mclib.utils.rendering.GLUtils;
 import com.mojang.blaze3d.platform.GlStateManager;
@@ -18,6 +17,7 @@ import org.joml.Matrix4f;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE;
 import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
 
+//TODO checkout ContainerEventHandler -> setFocused shit - compare with McLib and see how it can be implemented to complement dragging behavior
 @OnlyIn(Dist.CLIENT)
 public class UIScreen extends Screen {
     private final UIRootElement root;
@@ -50,7 +50,7 @@ public class UIScreen extends Screen {
 
         this.root.height(this.height).width(this.width);
         this.root.resize(new DocumentFlowRow());
-        this.context.resetCursor();
+        this.context.resetPreparedCursor();
     }
 
     @Override
@@ -94,7 +94,7 @@ public class UIScreen extends Screen {
          * as Windows or so is rendering it. So the rendering should only be changed once.
          * Here we check if the UI render wants to change the cursor, if yes, it will be applied at the end once.
          */
-        this.context.resetCursor();
+        this.context.resetPreparedCursor();
 
         this.root.render(this.context);
 
@@ -171,8 +171,25 @@ public class UIScreen extends Screen {
             return true;
         }
 
-        this.context.setKeyboardKey(key);
+        this.context.pressKeyboardKey(key);
         return this.root.keyPressed(this.context);
+    }
+
+    @Override
+    public boolean keyReleased(int key, int scanCode, int modifiers) {
+        this.context.releaseKeyboardKey(key);
+        return this.root.keyReleased(this.context);
+    }
+
+    /**
+     * @param key
+     * @param i TODO I HAVE NO IDEA WHAT THIS IS
+     * @return
+     */
+    @Override
+    public boolean charTyped(char key, int i) {
+        this.context.typeChar(key);
+        return this.root.charTyped(this.context);
     }
 
     private void updateMousePosition() {

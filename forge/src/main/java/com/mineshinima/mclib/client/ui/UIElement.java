@@ -889,4 +889,34 @@ public class UIElement {
     public boolean keyPress(UIContext context) {
         return false;
     }
+
+    public boolean keyReleased(UIContext context) {
+        List<UIElement> children = this.getChildren();
+        for (int i = children.size() - 1; i >= 0; i--) {
+            UIElement element = children.get(i);
+            if (!element.canRender) continue;
+            if (element.keyReleased(context)) return true;
+        }
+
+        return this.keyRelease(context);
+    }
+
+    public boolean keyRelease(UIContext context) {
+        return false;
+    }
+
+    public boolean charTyped(UIContext context) {
+        List<UIElement> children = this.getChildren();
+        for (int i = children.size() - 1; i >= 0; i--) {
+            UIElement element = children.get(i);
+            if (!element.canRender) continue;
+            if (element.charTyped(context)) return true;
+        }
+
+        return this.charType(context);
+    }
+
+    public boolean charType(UIContext context) {
+        return false;
+    }
 }
