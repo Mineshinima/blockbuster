@@ -62,7 +62,9 @@ public class UIPanel extends UIElement {
 
         //TODO for testing and debugging - remove later
         if (context.getKeyboardKey() == GLFW.GLFW_KEY_4) {
+            UIElement root = this.getRoot();
             this.remove();
+            root.resize(new DocumentFlowRow());
 
             return true;
         } else if (context.getKeyboardKey() == GLFW.GLFW_KEY_5) {
