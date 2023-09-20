@@ -40,6 +40,22 @@ public class Color implements ICopy<Color> {
         return this;
     }
 
+    public float getR() {
+        return this.r;
+    }
+
+    public float getB() {
+        return this.b;
+    }
+
+    public float getG() {
+        return this.g;
+    }
+
+    public float getA() {
+        return this.a;
+    }
+
     public Color set(float value, int component) {
         switch (component) {
             case 1:

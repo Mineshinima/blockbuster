@@ -30,6 +30,9 @@ public class UIScrollTransformation extends UITransformation<UIScrollElement> {
         return this.totalHeight;
     }
 
+    /**
+     * @return how much can be scrolled vertically
+     */
     public int getVerticalScrollSize() {
         int barOffset = 0;
 
@@ -40,6 +43,9 @@ public class UIScrollTransformation extends UITransformation<UIScrollElement> {
         return this.totalHeight + this.getCalculatedPadding()[0] + this.getCalculatedPadding()[2] - barOffset;
     }
 
+    /**
+     * @return how much can be scrolled horizontally
+     */
     public int getHorizontalScrollSize() {
         int barOffset = 0;
 
@@ -61,7 +67,6 @@ public class UIScrollTransformation extends UITransformation<UIScrollElement> {
         /*
          * The area needs to be offset here, so the scrolling will be applied for every resizing situation
          * When resizing the maximum scroll offsets change and the scroll value needs to be clamped again
-         * TODO NOTE that became tricky for a moment... resizing via onAreasSet() cannot be done because in the end it will result in stackoverflow
          */
         this.target.setScrollX(this.target.getScrollX());
         this.target.setScrollY(this.target.getScrollY());

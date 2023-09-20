@@ -520,7 +520,6 @@ public class UITransformation<T extends UIElement> {
             /*
              * Math.round can cause issues sometimes where with "perfect" percentages,
              * e.g. 4 * 25% width elements might not always fit in one row
-             * TODO floor fixes this but could in theory lead to 1 pixel inconsistencies
              */
             return (int) Math.floor(relative * unit.getValue()) + unit.getOffset();
         } else if (unit.getType() == UnitType.PIXEL) {
