@@ -43,20 +43,20 @@ public class RenderingUtils {
         bufferBuilder.vertex(x + w, y + h, z).uv(u,0).endVertex();
     }
 
-    public static void renderCircle(Vector3f center, Vector3f normal, float radius, int divisions, Color color, float thickness) {
+    public static void renderCircle(Vector3d center, Vector3d normal, float radius, int divisions, Color color, float thickness) {
         BufferBuilder builder = Tesselator.getInstance().getBuilder();
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
         builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-        Matrix3f rotation = new Matrix3f();
+        Matrix3d rotation = new Matrix3d();
         rotation.rotateY((float) Math.toRadians(getYaw(normal)));
         rotation.rotateX((float) Math.toRadians(getPitch(normal)));
 
         for (int i = 1; i <= divisions; i++) {
-            float angle0 = (float) (2 * Math.PI / divisions * (i - 1));
-            float angle1 = (float) (2 * Math.PI / divisions * i);
+            double angle0 = 2 * Math.PI / divisions * (i - 1);
+            double angle1 = 2 * Math.PI / divisions * i;
 
-            Vector3f a = new Vector3f(radius * (float) Math.cos(angle0), radius * (float) Math.sin(angle0), 0);
-            Vector3f b = new Vector3f(radius * (float) Math.cos(angle1), radius * (float) Math.sin(angle1), 0);
+            Vector3d a = new Vector3d(radius * Math.cos(angle0), radius * Math.sin(angle0), 0);
+            Vector3d b = new Vector3d(radius * Math.cos(angle1), radius * Math.sin(angle1), 0);
             rotation.transform(a);
             rotation.transform(b);
             a.add(center);
@@ -66,6 +66,66 @@ public class RenderingUtils {
         }
 
         Tesselator.getInstance().end();
+    }
+
+    public static void renderCylinder(Vector3d center, Vector3d normal, float radius, float height, int divisions, Color color) {
+        BufferBuilder builder = Tesselator.getInstance().getBuilder();
+        RenderSystem.setShader(GameRenderer::getPositionColorShader);
+        builder.begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION_COLOR);
+
+        Matrix4d transformation = new Matrix4d();
+        transformation.translate(center);
+        transformation.rotateY(Math.toRadians(getYaw(normal)));
+        transformation.rotateX(Math.toRadians(getPitch(normal) - 90));
+
+        /*
+         * First go through the major shape on the XY plane
+         */
+        for (int i = 1; i <= divisions; i++) {
+            double angle0 = 2 * Math.PI / divisions * (i - 1);
+            double angle1 = 2 * Math.PI / divisions * i;
+
+            Vector4d v0Top = new Vector4d(radius * Math.sin(angle0), height / 2F, radius * Math.cos(angle0), 1);
+            Vector4d v0Bottom = new Vector4d(radius * Math.sin(angle0), -height / 2F, radius * Math.cos(angle0), 1);
+            Vector4d v1Top = new Vector4d(radius * Math.sin(angle1), height / 2F, radius * Math.cos(angle1), 1);
+            Vector4d v1Bottom = new Vector4d(radius * Math.sin(angle1), -height / 2F, radius * Math.cos(angle1), 1);
+            Vector4d centerTop = new Vector4d(0, height / 2F, 0, 1);
+            Vector4d centerBottom = new Vector4d(0, -height / 2F, 0, 1);
+            transformation.transform(centerTop);
+            transformation.transform(centerBottom);
+            transformation.transform(v1Top);
+            transformation.transform(v1Bottom);
+            transformation.transform(v0Top);
+            transformation.transform(v0Bottom);
+
+            /* top */
+            builder.vertex(v1Top.x, v1Top.y, v1Top.z).color(color.getRGBAColor()).endVertex();
+            builder.vertex(centerTop.x, centerTop.y, centerTop.z).color(color.getRGBAColor()).endVertex();
+            builder.vertex(v0Top.x, v0Top.y, v0Top.z).color(color.getRGBAColor()).endVertex();
+            /* bottom */
+            builder.vertex(v0Bottom.x, v0Bottom.y, v0Bottom.z).color(color.getRGBAColor()).endVertex();
+            builder.vertex(centerBottom.x, centerBottom.y, centerBottom.z).color(color.getRGBAColor()).endVertex();
+            builder.vertex(v1Bottom.x, v1Bottom.y, v1Bottom.z).color(color.getRGBAColor()).endVertex();
+
+            /* side quad */
+            builder.vertex(v0Top.x, v0Top.y, v0Top.z).color(color.getRGBAColor()).endVertex();
+            builder.vertex(v1Bottom.x, v1Bottom.y, v1Bottom.z).color(color.getRGBAColor()).endVertex();
+            builder.vertex(v1Top.x, v1Top.y, v1Top.z).color(color.getRGBAColor()).endVertex();
+
+            builder.vertex(v0Top.x, v0Top.y, v0Top.z).color(color.getRGBAColor()).endVertex();
+            builder.vertex(v0Bottom.x, v0Bottom.y, v0Bottom.z).color(color.getRGBAColor()).endVertex();
+            builder.vertex(v1Bottom.x, v1Bottom.y, v1Bottom.z).color(color.getRGBAColor()).endVertex();
+        }
+
+        Tesselator.getInstance().end();
+    }
+
+    public static void renderCylinder(Vector3d center, float radius, float height, int divisions, Color color) {
+        renderCylinder(center, new Vector3d(0, 1, 0), radius, height, divisions, color);
+    }
+
+    public static void renderTorus(Vector3d center, float majorRadius, float minorRadius, int majorDivisions, int minorDivisions,  Color color) {
+        renderTorus(center, new Vector3d(0, 1, 0), majorRadius, minorRadius, majorDivisions, minorDivisions, color);
     }
 
     /**
@@ -82,11 +142,12 @@ public class RenderingUtils {
         BufferBuilder builder = Tesselator.getInstance().getBuilder();
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
         builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-        Matrix3d rotation = new Matrix3d();
+        Matrix4d rotation = new Matrix4d();
+        rotation.translate(center);
         rotation.rotateY(Math.toRadians(getYaw(normal)));
         rotation.rotateX(Math.toRadians(getPitch(normal)));
 
-        Matrix3d majorRotation = new Matrix3d();
+        Matrix4d majorRotation = new Matrix4d();
 
         /*
          * First go through the major shape on the XY plane
@@ -104,21 +165,16 @@ public class RenderingUtils {
                 double angleMinor0 = 2 * Math.PI / minorDivisions * (j - 1);
                 double angleMinor1 = 2 * Math.PI / minorDivisions * j;
 
-                Vector3d v0 = new Vector3d(0, majorRadius + minorRadius * Math.sin(angleMinor0), minorRadius * Math.cos(angleMinor0));
-                Vector3d v1 = new Vector3d(0, majorRadius + minorRadius * Math.sin(angleMinor1), minorRadius * Math.cos(angleMinor1));
-                Vector3d v2 = new Vector3d(v0);
-                Vector3d v3 = new Vector3d(v1);
+                Vector4d v0 = new Vector4d(0, majorRadius + minorRadius * Math.sin(angleMinor0), minorRadius * Math.cos(angleMinor0), 1);
+                Vector4d v1 = new Vector4d(0, majorRadius + minorRadius * Math.sin(angleMinor1), minorRadius * Math.cos(angleMinor1), 1);
+                Vector4d v2 = new Vector4d(v0);
+                Vector4d v3 = new Vector4d(v1);
                 majorRotation.set(rotation).rotateZ(angle0);
                 majorRotation.transform(v0);
                 majorRotation.transform(v1);
                 majorRotation.set(rotation).rotateZ(angle1);
                 majorRotation.transform(v2);
                 majorRotation.transform(v3);
-
-                v0.add(center);
-                v1.add(center);
-                v2.add(center);
-                v3.add(center);
 
                 builder.vertex(v1.x, v1.y, v1.z).color(color.getRGBAColor()).endVertex();
                 builder.vertex(v3.x, v3.y, v3.z).color(color.getRGBAColor()).endVertex();
@@ -130,11 +186,23 @@ public class RenderingUtils {
         Tesselator.getInstance().end();
     }
 
-    public static void renderLine(List<Vector3f> points, Color color, float thickness) {
-
+    public static void buildLine(BufferBuilder builder, List<Vector3d> points, Color color, float thickness) {
+        for (int i = 1; i < points.size(); i++) {
+            buildLine(builder, points.get(i - 1), points.get(i), color, thickness);
+        }
     }
 
-    public static void renderLine(Vector3f a, Vector3f b, Color color, float thickness) {
+    public static void renderLine(List<Vector3d> points, Color color, float thickness) {
+        BufferBuilder builder = Tesselator.getInstance().getBuilder();
+        RenderSystem.setShader(GameRenderer::getPositionColorShader);
+        builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+
+        buildLine(builder, points, color, thickness);
+
+        Tesselator.getInstance().end();
+    }
+
+    public static void renderLine(Vector3d a, Vector3d b, Color color, float thickness) {
         BufferBuilder builder = Tesselator.getInstance().getBuilder();
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
         builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
@@ -150,26 +218,26 @@ public class RenderingUtils {
      * @param color
      * @param thickness
      */
-    public static void buildLine(BufferBuilder builder, Vector3f a, Vector3f b, Color color, float thickness) {
-        Vector3f direction = new Vector3f(b).sub(a);
+    public static void buildLine(BufferBuilder builder, Vector3d a, Vector3d b, Color color, float thickness) {
+        Vector3d direction = new Vector3d(b).sub(a);
         Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
-        Matrix4f viewRotation = new Matrix4f(RenderSystem.getInverseViewRotationMatrix()).invert();
-        Vector3f cameraPos = new Vector3f((float) camera.getPosition().x, (float) camera.getPosition().y, (float) camera.getPosition().z);
-        Vector3f distance = new Matrix3f(viewRotation).transform(new Vector3f(a).add(new Vector3f(direction).mul(0.5F)).sub(cameraPos));
+        Matrix4d viewRotation = MatrixUtils.toMatrix4d(RenderSystem.getInverseViewRotationMatrix()).invert();
+        Vector3d cameraPos = new Vector3d(camera.getPosition().x, camera.getPosition().y, camera.getPosition().z);
+        Vector3d distance = new Matrix3d(viewRotation).transform(new Vector3d(a).add(new Vector3d(direction).mul(0.5F)).sub(cameraPos));
         float fov = RenderSystem.getProjectionMatrix().perspectiveFov();
         thickness = (float) (thickness / 2F * 0.25F * Math.abs(distance.z) * (Math.tan(fov / 2)));
 
-        Matrix4f transformation = getFacingRotation(Facing.LOOKAT_DIRECTION, a, direction);
+        Matrix4d transformation = getFacingRotation(Facing.LOOKAT_DIRECTION, a, direction);
         transformation.m30(a.x);
         transformation.m31(a.y);
         transformation.m32(a.z);
-        Vector4f[] vertices = new Vector4f[4];
-        vertices[0] = new Vector4f(-thickness, direction.length(), 0, 1);
-        vertices[1] = new Vector4f(-thickness, 0, 0, 1);
-        vertices[2] = new Vector4f(thickness, 0, 0, 1);
-        vertices[3] = new Vector4f(thickness, direction.length(), 0, 1);
+        Vector4d[] vertices = new Vector4d[4];
+        vertices[0] = new Vector4d(-thickness, direction.length(), 0, 1);
+        vertices[1] = new Vector4d(-thickness, 0, 0, 1);
+        vertices[2] = new Vector4d(thickness, 0, 0, 1);
+        vertices[3] = new Vector4d(thickness, direction.length(), 0, 1);
 
-        for (Vector4f vertex : vertices) {
+        for (Vector4d vertex : vertices) {
             transformation.transform(vertex);
             builder.vertex(vertex.x, vertex.y, vertex.z).color(color.getR(), color.getG(), color.getB(), color.getA()).endVertex();
         }
@@ -225,16 +293,16 @@ public class RenderingUtils {
      * @param direction is used when the facing mode {@link Facing#isDirection} is true. Otherwise it can be null
      * @return
      */
-    public static Matrix4f getFacingRotation(Facing facing, Vector3f position, @Nullable Vector3f direction) throws IllegalArgumentException {
+    public static Matrix4d getFacingRotation(Facing facing, Vector3d position, @Nullable Vector3d direction) throws IllegalArgumentException {
         if (facing.isDirection && direction == null) {
             throw new IllegalArgumentException("Argument direction cannot be null when the facing mode has isDirection=true");
         }
 
         Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
-        Matrix4f rotation = new Matrix4f();
+        Matrix4d rotation = new Matrix4d();
 
-        float cYaw = camera.getYRot();
-        float cPitch = camera.getXRot();
+        double cYaw = camera.getYRot();
+        double cPitch = camera.getXRot();
         double cX = camera.getPosition().x;
         double cY = camera.getPosition().y;
         double cZ = camera.getPosition().z;
@@ -248,13 +316,13 @@ public class RenderingUtils {
             double dZ = cZ - position.z;
             double horizontalDistance = Math.sqrt(dX * dX + dZ * dZ);
 
-            cYaw = 180 + (float) (Math.toDegrees(Math.atan2(dZ, dX)) - 90.0F);
-            cPitch = (float) (Math.toDegrees(Math.atan2(dY, horizontalDistance)));
+            cYaw = 180 + Math.toDegrees(Math.atan2(dZ, dX)) - 90.0D;
+            cPitch = Math.toDegrees(Math.atan2(dY, horizontalDistance));
         }
 
         if (facing.isDirection)
         {
-            direction = new Vector3f(direction);
+            direction = new Vector3d(direction);
             double lengthSq = direction.lengthSquared();
             if (lengthSq < 0.000001)
             {
@@ -269,22 +337,22 @@ public class RenderingUtils {
         switch (facing) {
             case LOOKAT_XYZ:
             case ROTATE_XYZ:
-                rotation.rotateY((float) Math.toRadians(180 - cYaw));
-                rotation.rotateX((float) Math.toRadians(-cPitch));
+                rotation.rotateY(Math.toRadians(180 - cYaw));
+                rotation.rotateX(Math.toRadians(-cPitch));
                 break;
             case ROTATE_Y:
             case LOOKAT_Y:
-                rotation.rotateY((float) Math.toRadians(180 - cYaw));
+                rotation.rotateY(Math.toRadians(180 - cYaw));
                 break;
             case LOOKAT_DIRECTION:
-                Vector3f cameraDir = new Vector3f((float) (cX - position.x),
-                                                  (float) (cY - position.y),
-                                                  (float) (cZ - position.z));
-                Vector4f rotatedNormal = new Vector4f(0,0,1,0);
+                Vector3d cameraDir = new Vector3d((cX - position.x),
+                                                  (cY - position.y),
+                                                  (cZ - position.z));
+                Vector4d rotatedNormal = new Vector4d(0,0,1,0);
 
 
-                rotation.rotateY((float) Math.toRadians(getYaw(direction)));
-                rotation.rotateX((float) Math.toRadians(getPitch(direction) + 90));
+                rotation.rotateY(Math.toRadians(getYaw(direction)));
+                rotation.rotateX(Math.toRadians(getPitch(direction) + 90));
 
                 rotation.transform(rotatedNormal);
 
@@ -292,7 +360,7 @@ public class RenderingUtils {
                  * The direction vector is the normal of the plane used for calculating the rotation around local y Axis.
                  * Project the cameraDir onto that plane to find out the axis angle (direction vector is the y axis).
                  */
-                cameraDir.sub(new Vector3f(direction).mul(cameraDir.dot(direction)));
+                cameraDir.sub(new Vector3d(direction).mul(cameraDir.dot(direction)));
 
                 if (cameraDir.lengthSquared() < 1.0e-30) break;
 
@@ -304,8 +372,8 @@ public class RenderingUtils {
                  * on the rotation of cameraDir. Use this to find out the sign of the angle
                  * between cameraDir and the rotatedNormal.
                  */
-                Vector3f rotationDirection = new Vector3f(rotatedNormal.x, rotatedNormal.y, rotatedNormal.z).cross(cameraDir);
-                rotation.rotateY(Math.copySign(cameraDir.angle(new Vector3f(rotatedNormal.x, rotatedNormal.y, rotatedNormal.z)), rotationDirection.dot(direction)));
+                Vector3d rotationDirection = new Vector3d(rotatedNormal.x, rotatedNormal.y, rotatedNormal.z).cross(cameraDir);
+                rotation.rotateY(Math.copySign(cameraDir.angle(new Vector3d(rotatedNormal.x, rotatedNormal.y, rotatedNormal.z)), rotationDirection.dot(direction)));
                 break;
 
         }
