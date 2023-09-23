@@ -68,6 +68,68 @@ public class RenderingUtils {
         Tesselator.getInstance().end();
     }
 
+    /**
+     *
+     * @param center
+     * @param normal
+     * @param majorRadius the radius of the torus in total
+     * @param minorRadius the radius of the torus actual mesh going around the center
+     * @param majorDivisions
+     * @param minorDivisions
+     * @param color
+     */
+    public static void renderTorus(Vector3d center, Vector3d normal, float majorRadius, float minorRadius, int majorDivisions, int minorDivisions,  Color color) {
+        BufferBuilder builder = Tesselator.getInstance().getBuilder();
+        RenderSystem.setShader(GameRenderer::getPositionColorShader);
+        builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+        Matrix3d rotation = new Matrix3d();
+        rotation.rotateY(Math.toRadians(getYaw(normal)));
+        rotation.rotateX(Math.toRadians(getPitch(normal)));
+
+        Matrix3d majorRotation = new Matrix3d();
+
+        /*
+         * First go through the major shape on the XY plane
+         */
+        for (int i = 1; i <= majorDivisions; i++) {
+            double angle0 = 2 * Math.PI / majorDivisions * (i - 1);
+            double angle1 = 2 * Math.PI / majorDivisions * i;
+
+            /*
+             * build a circle with minorDivisions on the YZ plane,
+             * duplicate it and rotate it by the majorAngles to get the quads.
+             * This happens per quad here.
+             */
+            for (int j = 1; j <= minorDivisions; j++) {
+                double angleMinor0 = 2 * Math.PI / minorDivisions * (j - 1);
+                double angleMinor1 = 2 * Math.PI / minorDivisions * j;
+
+                Vector3d v0 = new Vector3d(0, majorRadius + minorRadius * Math.sin(angleMinor0), minorRadius * Math.cos(angleMinor0));
+                Vector3d v1 = new Vector3d(0, majorRadius + minorRadius * Math.sin(angleMinor1), minorRadius * Math.cos(angleMinor1));
+                Vector3d v2 = new Vector3d(v0);
+                Vector3d v3 = new Vector3d(v1);
+                majorRotation.set(rotation).rotateZ(angle0);
+                majorRotation.transform(v0);
+                majorRotation.transform(v1);
+                majorRotation.set(rotation).rotateZ(angle1);
+                majorRotation.transform(v2);
+                majorRotation.transform(v3);
+
+                v0.add(center);
+                v1.add(center);
+                v2.add(center);
+                v3.add(center);
+
+                builder.vertex(v1.x, v1.y, v1.z).color(color.getRGBAColor()).endVertex();
+                builder.vertex(v3.x, v3.y, v3.z).color(color.getRGBAColor()).endVertex();
+                builder.vertex(v2.x, v2.y, v2.z).color(color.getRGBAColor()).endVertex();
+                builder.vertex(v0.x, v0.y, v0.z).color(color.getRGBAColor()).endVertex();
+            }
+        }
+
+        Tesselator.getInstance().end();
+    }
+
     public static void renderLine(List<Vector3f> points, Color color, float thickness) {
 
     }
@@ -252,6 +314,14 @@ public class RenderingUtils {
     }
 
     public static float getYaw(Vector3f direction) {
+        return (float) getYaw(new Vector3d(direction));
+    }
+
+    public static float getPitch(Vector3f direction) {
+        return (float) getPitch(new Vector3d(direction));
+    }
+
+    public static double getYaw(Vector3d direction) {
         double yaw = Math.atan2(-direction.x, direction.z);
         yaw = Math.toDegrees(yaw);
         if (yaw < -180) {
@@ -259,12 +329,12 @@ public class RenderingUtils {
         } else if (yaw > 180) {
             yaw -= 360;
         }
-        return (float) -yaw;
+        return -yaw;
     }
 
-    public static float getPitch(Vector3f direction) {
+    public static double getPitch(Vector3d direction) {
         double pitch = Math.atan2(direction.y, Math.sqrt(direction.x * direction.x + direction.z * direction.z));
-        return (float) -Math.toDegrees(pitch);
+        return -Math.toDegrees(pitch);
     }
 
     public enum Facing
